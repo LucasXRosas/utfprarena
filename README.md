@@ -1,9 +1,5 @@
 # Arena Management System (Back-End)
 
-![PHP](https://shields.io)
-![Composer](https://shields.io)
-![SQL](https://shields.io)
-
 Este é o sistema de back-end focado no **Gerenciamento de Arenas Esportivas**, desenvolvido como projeto universitário. A API controla de forma automatizada o fluxo cadastral de alunos, faturamento de mensalidades e restrições de acessos baseadas em inadimplência financeira.
 
 ---
