@@ -1,4 +1,4 @@
-# Gerenciamento de Arena (Back-End)
+# Gerenciamento de Arena de Beach Tennis (Back-End)
 
 Este é o sistema de back-end focado no **Gerenciamento de Arenas Esportivas**, desenvolvido como projeto universitário. A API controla de forma automatizada o fluxo cadastral de alunos, faturamento de mensalidades e restrições de acessos baseadas em inadimplência financeira.
 
