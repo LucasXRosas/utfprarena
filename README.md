@@ -23,6 +23,22 @@ O objetivo principal deste projeto é desenvolver uma API de back-end robusta e 
 
 ---
 
+## Impacto Esperado
+
+A implementação da API do projeto Arena UTFPR trará um impacto positivo direto tanto para a gestão do complexo esportivo quanto para a experiência dos praticantes:
+
+- **Para a Gestão e Organização:**
+  - **Redução Significativa da Inadimplência:** O motor automatizado de bloqueio reduz o risco de uso continuado das instalações por usuários com pendências financeiras prolongadas, protegendo a saúde financeira e o fluxo de caixa do empreendimento.
+  - **Eficiência Operacional:** Elimina a necessidade de conferência manual de planilhas e extratos por parte dos administradores, liberando a equipe para focar no atendimento, manutenção das quadras e expansão do negócio.
+  - **Decisões Baseadas em Dados:** Centraliza o histórico financeiro e relatórios de alunos, permitindo um acompanhamento preciso da receita e da taxa de adimplência.
+
+- **Para os Usuários (Alunos e Professores):**
+  - **Transparência e Autonomia:** Alunos ganham visibilidade clara sobre o status de suas mensalidades e histórico financeiro, sabendo exatamente suas obrigações sem constrangimentos presenciais.
+  - **Desbloqueio Instantâneo:** Ao regularizar débitos, o acesso e a permissão de reserva de quadras são reestabelecidos de forma imediata e automatizada, sem depender da intervenção de um atendente.
+  - **Previsibilidade:** A régua de cobrança preventiva alerta os alunos em prazos estratégicos (0, 7, 14 e 21 dias), evitando bloqueios surpresa.
+
+---
+
 ## Diretrizes de Escopo
 
 ### Problemas Identificados (Justificativa)
