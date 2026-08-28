@@ -42,10 +42,9 @@ Para garantir a entrega do projeto dentro do prazo letivo da universidade, as se
 
 ## Funcionalidades Chave
 
-* **Autenticação Tradicional:** Cadastro e Login de usuários utilizando e-mail e senhas criptografadas.
-* **Controle de Status:** Usuários divididos entre as permissões `ALUNO` e `PROFESSOR`.
-* **Motor Financeiro:** Geração recorrente de faturas e acompanhamento de status (`PENDENTE` e `PAGA`).
-* **Bloqueio Automático:** Restrição de login ou agendamento para alunos com mais de 2 meses de atraso.
+* **Autenticação Segura:** Fluxo tradicional de cadastro e login com criptografia e tokens de sessão.
+* **Gestão de Mensalidades:** Geração de faturas mensais e controle do fluxo de caixa dos alunos.
+* **Bloqueio Automatizado:** Motor de regras que restringe o acesso de alunos com mais de 2 meses de mensalidades em atraso.
 
 ---
 
