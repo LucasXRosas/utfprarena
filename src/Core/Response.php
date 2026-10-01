@@ -30,7 +30,6 @@ class Response
      * @param mixed $data
      * @param int $statusCode
      * @param array<string, string> $headers
-     * @return self
      */
     public static function json(mixed $data, int $statusCode = 200, array $headers = []): self
     {
@@ -40,15 +39,21 @@ class Response
     }
 
     /**
-     * @param string $html
-     * @param int $statusCode
      * @param array<string, string> $headers
-     * @return self
      */
     public static function html(string $html, int $statusCode = 200, array $headers = []): self
     {
         $headers['Content-Type'] = 'text/html; charset=utf-8';
         return new self($html, $statusCode, $headers);
+    }
+
+    /**
+     * Redireciona o browser para outra URL (HTTP 302).
+     * Usado apos login/logout com FlashMessage.
+     */
+    public static function redirect(string $url, int $statusCode = 302): self
+    {
+        return new self('', $statusCode, ['Location' => $url]);
     }
 
     public function send(): void
@@ -70,5 +75,13 @@ class Response
     public function getContent(): string
     {
         return $this->content;
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public function getHeaders(): array
+    {
+        return $this->headers;
     }
 }
