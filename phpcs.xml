@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<ruleset name="UTFPRArena Coding Standard">
+    <description>Padrao de estilo de codigo PSR-12 para o UTFPR Arena</description>
+
+    <!-- Analisar pastas src e tests -->
+    <file>src</file>
+    <file>tests</file>
+    <file>public</file>
+
+    <arg name="colors"/>
+    <arg value="sp"/>
+    <arg name="extensions" value="php"/>
+    <arg name="encoding" value="utf-8"/>
+
+    <!-- Utilizar a regra PSR-12 -->
+    <rule ref="PSR12"/>
+
+    <!-- Ignorar pastas de terceiros e caches -->
+    <exclude-pattern>*/vendor/*</exclude-pattern>
+    <exclude-pattern>*/.phpunit.cache/*</exclude-pattern>
+</ruleset>

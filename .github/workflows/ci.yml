@@ -1,0 +1,43 @@
+name: CI Pipeline - UTFPR Arena
+
+on:
+  push:
+    branches: [ "main", "develop" ]
+  pull_request:
+    branches: [ "main", "develop" ]
+
+jobs:
+  tests-and-linters:
+    name: Testes Unitários e Análise Estática
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Configurar PHP e Extensões
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: pdo, pdo_pgsql, mbstring
+          tools: composer:v2
+
+      - name: Cache de dependências do Composer
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.json') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
+      - name: Instalar Dependências do Composer
+        run: composer install --prefer-dist --no-progress --no-interaction
+
+      - name: Executar PHPCS (Estilo PSR-12)
+        run: vendor/bin/phpcs
+
+      - name: Executar PHPStan (Análise Estática)
+        run: vendor/bin/phpstan analyse
+
+      - name: Executar PHPUnit (Testes)
+        run: vendor/bin/phpunit
