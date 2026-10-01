@@ -1,0 +1,20 @@
+# Garante que o Git normalize line endings para LF no repositorio
+* text=auto eol=lf
+
+# Arquivos PHP sempre LF
+*.php text eol=lf
+
+# Arquivos de configuracao
+*.xml text eol=lf
+*.yml text eol=lf
+*.json text eol=lf
+*.neon text eol=lf
+*.conf text eol=lf
+*.md text eol=lf
+*.neon text eol=lf
+Dockerfile text eol=lf
+
+# Arquivos binarios — sem conversao
+*.png binary
+*.jpg binary
+*.gif binary
