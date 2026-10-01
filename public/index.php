@@ -1,12 +1,12 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * Front Controller - Ponto de Entrada Unico da Aplicacao (Padrao MVC)
  *
  * Todo o trafico HTTP e redirecionado aqui pelo Nginx.
  */
+
+declare(strict_types=1);
 
 // =============================================================================
 // 1. BOOTSTRAP: Autoload PSR-4 do Composer

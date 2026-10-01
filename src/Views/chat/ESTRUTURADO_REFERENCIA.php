@@ -1,12 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
-namespace App\Controllers;
-
-use App\Core\Request;
-use App\Core\Response;
-
 /**
  * ChatController (Versao Estruturada - Referencia Historica)
  *
@@ -16,6 +9,13 @@ use App\Core\Response;
  *
  * A versao orientada a objetos esta em: src/Controllers/ChatController.php
  */
+
+declare(strict_types=1);
+
+namespace App\Controllers;
+
+use App\Core\Request;
+use App\Core\Response;
 
 /**
  * Ponto de entrada estruturado para o chat (legado / referencia de aula).
@@ -34,7 +34,12 @@ use App\Core\Response;
  *       $message = $_POST['message'] ?? '';
  *
  *       if ($sender && $message) {
- *           $messages[] = ['id' => count($messages) + 1, 'sender' => $sender, 'message' => $message, 'sent_at' => date('Y-m-d H:i:s')];
+ *           $messages[] = [
+ *               'id' => count($messages) + 1,
+ *               'sender' => $sender,
+ *               'message' => $message,
+ *               'sent_at' => date('Y-m-d H:i:s'),
+ *           ];
  *           echo json_encode(['status' => 'success', 'data' => end($messages)]);
  *       } else {
  *           http_response_code(422);

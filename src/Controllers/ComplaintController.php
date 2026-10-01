@@ -36,7 +36,13 @@ class ComplaintController extends BaseController
         // TODO: Buscar reclamacoes do banco de dados
         $complaints = [
             new Complaint(1, 'Quadra com infiltracao', 'A quadra 3 esta com agua acumulada.', 'aluno@email.com'),
-            new Complaint(2, 'Vestiario sem agua quente', 'Vestiario masculino sem agua quente ha 3 dias.', 'professor@arena.com', Complaint::STATUS_IN_PROGRESS),
+            new Complaint(
+                2,
+                'Vestiario sem agua quente',
+                'Vestiario masculino sem agua quente ha 3 dias.',
+                'professor@arena.com',
+                Complaint::STATUS_IN_PROGRESS
+            ),
         ];
 
         return $this->json([

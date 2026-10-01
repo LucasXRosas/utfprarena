@@ -3,7 +3,7 @@
 <section class="chat-container">
     <h2>Chat da Arena</h2>
     <div id="chat-messages">
-        <?php foreach ($messages ?? [] as $msg): ?>
+        <?php foreach ($messages ?? [] as $msg) : ?>
             <div class="chat-message">
                 <strong><?= htmlspecialchars($msg['sender']) ?></strong>
                 <span><?= htmlspecialchars($msg['message']) ?></span>

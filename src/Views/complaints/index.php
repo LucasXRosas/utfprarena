@@ -4,7 +4,7 @@
     <h2>Registro de Reclamações</h2>
 
     <ul class="complaint-list">
-        <?php foreach ($complaints ?? [] as $complaint): ?>
+        <?php foreach ($complaints ?? [] as $complaint) : ?>
             <li class="complaint-item complaint-status-<?= htmlspecialchars($complaint['status']) ?>">
                 <strong><?= htmlspecialchars($complaint['title']) ?></strong>
                 <p><?= htmlspecialchars($complaint['description']) ?></p>
