@@ -145,8 +145,6 @@ class Router
 
     /**
      * @param callable|array<mixed> $handler
-     * @param string[] $middlewareNames
-     * @param array<string, string> $params
      */
     private function addRoute(string $method, string $path, callable|array $handler): void
     {

@@ -97,7 +97,7 @@
 
         <div class="session-info">
             <h3 style="color:#94a3b8; margin-bottom:.5rem; font-size:.85rem">🔐 Dados da Sessão (demonstração)</h3>
-            <pre><?= htmlspecialchars(json_encode($user, JSON_PRETTY_PRINT) ?: '{}') ?></pre>
+            <pre><?= htmlspecialchars(json_encode($user ?? [], JSON_PRETTY_PRINT) ?: '{}') ?></pre>
         </div>
     </main>
 </body>

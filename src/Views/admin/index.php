@@ -131,7 +131,7 @@
                 O <strong>RoleMiddleware</strong> garante isso — alunos autenticados recebem <code>403 Forbidden</code>.
             </p>
             <pre class="session-pre"><?= htmlspecialchars(
-                json_encode($user, JSON_PRETTY_PRINT) ?: '{}'
+                json_encode($user ?? [], JSON_PRETTY_PRINT) ?: '{}'
             ) ?></pre>
         </div>
     </main>

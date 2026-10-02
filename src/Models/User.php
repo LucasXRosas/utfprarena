@@ -54,6 +54,16 @@ class User
         return $this->phone;
     }
 
+    public function getPassword(): string
+    {
+        return $this->password;
+    }
+
+    public function verifyPassword(string $plainPassword): bool
+    {
+        return password_verify($plainPassword, $this->password);
+    }
+
     public function getRole(): string
     {
         return $this->role;

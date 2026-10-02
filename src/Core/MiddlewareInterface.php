@@ -18,7 +18,7 @@ interface MiddlewareInterface
      * Processa a requisicao.
      *
      * @param Request $request
-     * @param callable(): Response $next Handler seguinte na cadeia
+     * @param callable(Request): Response $next Handler seguinte na cadeia
      * @return Response
      */
     public function handle(Request $request, callable $next): Response;

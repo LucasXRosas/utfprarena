@@ -90,4 +90,12 @@ class UserTest extends TestCase
         $user = $this->makeUser(User::STATUS_ACTIVE, User::ROLE_MANAGER);
         $this->assertSame(User::ROLE_MANAGER, $user->getRole());
     }
+
+    public function testVerifyPasswordCorreta(): void
+    {
+        $user = $this->makeUser();
+        $this->assertTrue($user->verifyPassword('secret'));
+        $this->assertFalse($user->verifyPassword('wrong-password'));
+        $this->assertNotEmpty($user->getPassword());
+    }
 }
