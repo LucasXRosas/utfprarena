@@ -14,7 +14,7 @@ class PublicRoutesAccessTest extends TestCase
         parent::setUp();
         $this->client = new Client([
             'allow_redirects' => false,
-            'base_uri' => 'http://web:8080'
+            'base_uri'        => 'http://web:80'
         ]);
     }
 

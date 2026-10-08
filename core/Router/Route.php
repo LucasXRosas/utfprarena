@@ -54,7 +54,8 @@ class Route
 
     public function addMiddleware(Middleware $middleware): void
     {
-        $this->middlewares[] = $middleware;
+        // Prepend so outer middleware groups always execute before inner ones
+        array_unshift($this->middlewares, $middleware);
     }
 
     public function runMiddlewares(Request $request): void

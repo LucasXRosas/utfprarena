@@ -48,7 +48,7 @@ class AuthCest extends BaseAcceptanceCest
         $page->amOnPage('/login');
         $page->fillField('user[email]', 'inexistente@arena.com');
         $page->fillField('user[password]', 'senhaerrada');
-        $page->click('Entrar');
+        $page->click('#login_submit');
         $page->seeInCurrentUrl('/login');
         $page->see('Email ou senha inválidos');
     }
@@ -59,7 +59,7 @@ class AuthCest extends BaseAcceptanceCest
         $page->amOnPage('/login');
         $page->fillField('user[email]', 'admin@arena.com');
         $page->fillField('user[password]', 'admin123');
-        $page->click('Entrar');
+        $page->click('#login_submit');
         $page->seeInCurrentUrl('/admin');
         $page->see('Painel Gerencial');
     }
@@ -70,7 +70,7 @@ class AuthCest extends BaseAcceptanceCest
         $page->amOnPage('/login');
         $page->fillField('user[email]', 'aluno@arena.com');
         $page->fillField('user[password]', 'aluno123');
-        $page->click('Entrar');
+        $page->click('#login_submit');
         $page->seeInCurrentUrl('/dashboard');
         $page->see('Área do Aluno');
     }
@@ -81,7 +81,7 @@ class AuthCest extends BaseAcceptanceCest
         $page->amOnPage('/login');
         $page->fillField('user[email]', 'aluno@arena.com');
         $page->fillField('user[password]', 'aluno123');
-        $page->click('Entrar');
+        $page->click('#login_submit');
         $page->seeInCurrentUrl('/dashboard');
 
         $page->click('Sair');

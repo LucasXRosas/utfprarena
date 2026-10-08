@@ -2,7 +2,7 @@ actor: AcceptanceTester
 modules:
   enabled:
     - WebDriver:
-        url: "http://web:8080"
+        url: "http://web:80"
         browser: chrome
         host: selenium # This refers to the Selenium hub in Docker
         port: 4444 # Default port for Selenium Hub

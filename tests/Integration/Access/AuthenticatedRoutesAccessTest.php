@@ -14,7 +14,8 @@ class AuthenticatedRoutesAccessTest extends TestCase
         parent::setUp();
         $this->client = new Client([
             'allow_redirects' => false,
-            'base_uri' => 'http://web:8080'
+            'http_errors'     => false,
+            'base_uri'        => 'http://web:80'
         ]);
     }
 
