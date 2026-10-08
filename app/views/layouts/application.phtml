@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><?= htmlspecialchars($title ?? 'UTFPR Arena Beach Tennis') ?></title>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="/assets/js/application.js"></script>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="/assets/css/application.css">
+</head>
+
+<body class="bg-light d-flex flex-column min-vh-100">
+    <!-- Navbar Principal -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm mb-4">
+        <div class="container">
+            <a class="navbar-brand fw-bold d-flex align-items-center gap-2" href="/">
+                <span class="badge bg-warning text-dark fs-6">UTFPR</span>
+                <span>Arena Beach Tennis</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Alternar navegação">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="mainNav">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/"><i class="bi bi-house-door"></i> Início</a>
+                    </li>
+                    <?php if (\Lib\Authentication\Auth::check()) : ?>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/dashboard"><i class="bi bi-person-badge"></i> Área do Aluno</a>
+                        </li>
+                        <?php $loggedUser = \Lib\Authentication\Auth::user(); ?>
+                        <?php if ($loggedUser && $loggedUser->isAdmin()) : ?>
+                            <li class="nav-item">
+                                <a class="nav-link text-warning" href="/admin"><i class="bi bi-speedometer2"></i> Painel Gerencial</a>
+                            </li>
+                        <?php endif; ?>
+                    <?php endif; ?>
+                </ul>
+
+                <div class="d-flex align-items-center gap-3">
+                    <?php if (\Lib\Authentication\Auth::check()) : ?>
+                        <?php $loggedUser = \Lib\Authentication\Auth::user(); ?>
+                        <div class="text-light small text-end d-none d-md-block">
+                            <div class="fw-semibold"><?= htmlspecialchars($loggedUser ? $loggedUser->name : 'Usuário') ?></div>
+                            <span class="badge <?= ($loggedUser && $loggedUser->isAdmin()) ? 'bg-danger' : 'bg-primary' ?>">
+                                <?= ($loggedUser && $loggedUser->isAdmin()) ? 'ADMINISTRADOR' : 'ALUNO' ?>
+                            </span>
+                        </div>
+                        <form action="/logout" method="POST" class="d-inline m-0">
+                            <button type="submit" class="btn btn-outline-danger btn-sm" id="logout_btn">
+                                <i class="bi bi-box-arrow-right"></i> Sair
+                            </button>
+                        </form>
+                    <?php else : ?>
+                        <a href="/login" class="btn btn-warning btn-sm fw-semibold" id="nav_login_btn">
+                            <i class="bi bi-box-arrow-in-right"></i> Entrar
+                        </a>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Conteúdo Principal -->
+    <main class="container flex-grow-1 mb-5">
+        <?php require '_flash_message.phtml'; ?>
+
+        <?php require $view; ?>
+    </main>
+
+    <!-- Rodapé -->
+    <footer class="bg-dark text-secondary py-3 mt-auto border-top border-secondary">
+        <div class="container text-center small">
+            <p class="mb-1 text-light">&copy; <?= date('Y') ?> UTFPR Arena Beach Tennis — Framework TSI34D</p>
+            <p class="mb-0 text-muted">Desenvolvimento Web &bull; Automação de Acesso &bull; Controle de Inadimplência</p>
+        </div>
+    </footer>
+</body>
+
+</html>

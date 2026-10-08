@@ -1,0 +1,60 @@
+<div class="row justify-content-center py-4">
+    <div class="col-md-6 col-lg-5">
+        <div class="card shadow-sm border-0 rounded-3">
+            <div class="card-header bg-dark text-white text-center py-3 border-0 rounded-top-3">
+                <i class="bi bi-shield-lock text-warning display-6 mb-2"></i>
+                <h4 class="fw-bold mb-0">Autenticação de Acesso</h4>
+                <small class="text-secondary">UTFPR Arena Beach Tennis</small>
+            </div>
+            <div class="card-body p-4 bg-white">
+                <form action="/login" method="POST" id="login_form">
+                    <div class="mb-3">
+                        <label for="user_email" class="form-label fw-semibold">E-mail</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light"><i class="bi bi-envelope"></i></span>
+                            <input 
+                                type="email" 
+                                class="form-control" 
+                                id="user_email" 
+                                name="user[email]" 
+                                placeholder="exemplo@arena.com" 
+                                required 
+                                autofocus
+                            >
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="user_password" class="form-label fw-semibold">Senha</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light"><i class="bi bi-key"></i></span>
+                            <input 
+                                type="password" 
+                                class="form-control" 
+                                id="user_password" 
+                                name="user[password]" 
+                                placeholder="Digite sua senha" 
+                                required
+                            >
+                        </div>
+                    </div>
+
+                    <div class="d-grid mb-3">
+                        <button type="submit" class="btn btn-warning btn-lg fw-semibold" id="login_submit">
+                            <i class="bi bi-box-arrow-in-right"></i> Entrar
+                        </button>
+                    </div>
+                </form>
+
+                <div class="alert alert-light border small text-muted mb-0">
+                    <div class="fw-bold text-dark mb-1"><i class="bi bi-lightbulb text-warning"></i> Contas Pré-cadastradas:</div>
+                    <ul class="mb-0 ps-3">
+                        <li><strong>Admin:</strong> <code>admin@arena.com</code> | <code>admin123</code></li>
+                        <li><strong>Aluno Ativo:</strong> <code>aluno@arena.com</code> | <code>aluno123</code></li>
+                        <li><strong>Aluno Bloqueado:</strong> <code>bloqueado@arena.com</code> | <code>aluno123</code></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

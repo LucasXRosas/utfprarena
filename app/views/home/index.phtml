@@ -1,0 +1,113 @@
+<div class="row align-items-center mb-5 py-4 bg-white rounded-3 shadow-sm border p-4">
+    <div class="col-lg-7">
+        <span class="badge bg-warning text-dark px-3 py-2 mb-2 text-uppercase fw-bold">Sistema de Gestão Esportiva</span>
+        <h1 class="display-5 fw-bold text-dark mb-3">UTFPR Arena Beach Tennis</h1>
+        <p class="lead text-secondary mb-4">
+            Plataforma centralizada para automação operacional de complexos de Beach Tennis. 
+            Controle automatizado de acessos às quadras, gestão de faturas mensais e restrição inteligente de inadimplentes.
+        </p>
+        <div class="d-flex gap-2 flex-wrap">
+            <?php if (\Lib\Authentication\Auth::check()) : ?>
+                <a href="/dashboard" class="btn btn-primary btn-lg px-4 gap-3">
+                    <i class="bi bi-person-badge"></i> Acessar Meu Dashboard
+                </a>
+                <?php $u = \Lib\Authentication\Auth::user(); ?>
+                <?php if ($u && $u->isAdmin()) : ?>
+                    <a href="/admin" class="btn btn-dark btn-lg px-4">
+                        <i class="bi bi-speedometer2"></i> Painel do Gestor
+                    </a>
+                <?php endif; ?>
+            <?php else : ?>
+                <a href="/login" class="btn btn-warning btn-lg px-4 fw-semibold">
+                    <i class="bi bi-box-arrow-in-right"></i> Entrar no Sistema
+                </a>
+            <?php endif; ?>
+            <a href="https://github.com/LucasXRosas/utfprarena/wiki" target="_blank" class="btn btn-outline-secondary btn-lg px-4">
+                <i class="bi bi-journal-text"></i> Documentação da Wiki
+            </a>
+        </div>
+    </div>
+    <div class="col-lg-5 text-center d-none d-lg-block">
+        <div class="p-4 bg-light rounded-4 border">
+            <i class="bi bi-trophy text-warning display-1"></i>
+            <h4 class="mt-3 fw-bold text-dark">Quadras de Areia</h4>
+            <p class="text-muted small mb-0">Controle de acesso por biometria lógica e validação em tempo real de mensalidades.</p>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body p-4">
+                <div class="fs-1 text-primary mb-3"><i class="bi bi-shield-check"></i></div>
+                <h5 class="card-title fw-bold">Autenticação Segura</h5>
+                <p class="card-text text-secondary">
+                    Criptografia robusta utilizando BCrypt com salt dinâmico, proteção de sessão contra fixação e controle de acesso baseado em papéis (RBAC).
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body p-4">
+                <div class="fs-1 text-danger mb-3"><i class="bi bi-slash-circle"></i></div>
+                <h5 class="card-title fw-bold">Motor de Inadimplência</h5>
+                <p class="card-text text-secondary">
+                    Alunos com 2 ou mais faturas vencidas são automaticamente bloqueados na catraca lógica da arena, protegendo o fluxo de caixa do negócio.
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body p-4">
+                <div class="fs-1 text-success mb-3"><i class="bi bi-arrow-repeat"></i></div>
+                <h5 class="card-title fw-bold">Reativação Instantânea</h5>
+                <p class="card-text text-secondary">
+                    Ao quitar pendências em atraso, o sistema reestabelece os acessos do atleta de forma automática, eliminando a dependência de processos manuais.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm p-4 bg-white">
+    <h5 class="fw-bold text-dark mb-3"><i class="bi bi-info-circle text-primary"></i> Credenciais para Demonstração da Rubrica</h5>
+    <div class="table-responsive">
+        <table class="table table-bordered align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Perfil</th>
+                    <th>E-mail</th>
+                    <th>Senha</th>
+                    <th>Área de Acesso</th>
+                    <th>Regra de Negócio</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><span class="badge bg-danger">ADMINISTRADOR</span></td>
+                    <td><code>admin@arena.com</code></td>
+                    <td><code>admin123</code></td>
+                    <td><code>/admin</code></td>
+                    <td>Gestão completa, auditoria, bloqueio/ativação manual de atletas.</td>
+                </tr>
+                <tr>
+                    <td><span class="badge bg-primary">ALUNO ATIVO</span></td>
+                    <td><code>aluno@arena.com</code></td>
+                    <td><code>aluno123</code></td>
+                    <td><code>/dashboard</code></td>
+                    <td>Acesso liberado às quadras, visualização de faturas em dia.</td>
+                </tr>
+                <tr>
+                    <td><span class="badge bg-secondary">ALUNO BLOQUEADO</span></td>
+                    <td><code>bloqueado@arena.com</code></td>
+                    <td><code>aluno123</code></td>
+                    <td><em>Bloqueado</em></td>
+                    <td>Demonstração de rejeição de login por inadimplência (> 2 faturas).</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -1,21 +1,37 @@
 <?xml version="1.0"?>
-<ruleset name="UTFPRArena Coding Standard">
-    <description>Padrao de estilo de codigo PSR-12 para o UTFPR Arena</description>
+<ruleset name="Custom_PSR12">
+    <description>Custom ruleset Based on PSR12</description>
+    <!-- Rule to be referenced (`PSR12`) -->
+    <rule ref="PSR12" />
 
-    <!-- Analisar pastas src e tests -->
-    <file>src</file>
-    <file>tests</file>
-    <file>public</file>
+    <arg name="extensions" value="php" />
 
-    <arg name="colors"/>
-    <arg value="sp"/>
-    <arg name="extensions" value="php"/>
-    <arg name="encoding" value="utf-8"/>
+    <!-- Color the result output -->
+    <arg name="colors" />
 
-    <!-- Utilizar a regra PSR-12 -->
-    <rule ref="PSR12"/>
+    <!-- Display progress (-p) -->
+    <!-- Display violation rules in error information (-s) -->
+    <arg value="ps" />
 
-    <!-- Ignorar pastas de terceiros e caches -->
-    <exclude-pattern>*/vendor/*</exclude-pattern>
-    <exclude-pattern>*/.phpunit.cache/*</exclude-pattern>
+    <!-- Directories to exclude from the check (for Laravel) -->
+    <exclude-pattern>/database/</exclude-pattern>
+    <exclude-pattern>/vendor/</exclude-pattern>
+    <exclude-pattern>/tests/Support/_generated/</exclude-pattern>
+
+    <!-- Allow snake_case method names in classes that end with "Test" -->
+    <rule ref="PSR1.Methods.CamelCapsMethodName.NotCamelCaps">
+        <exclude-pattern>*Test.php</exclude-pattern>
+    </rule>
+
+    <!-- Allow lines up to 130 characters -->
+    <rule ref="Generic.Files.LineLength">
+        <properties>
+            <property name="lineLimit" value="130" />
+        </properties>
+    </rule>
+
+    <!-- Allow use _ in name method in classes that end with "Cest" -->
+    <rule ref="PSR2.Methods.MethodDeclaration.Underscore">
+        <exclude-pattern>*Cest.php</exclude-pattern>
+    </rule>
 </ruleset>

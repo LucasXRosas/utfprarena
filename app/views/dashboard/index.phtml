@@ -1,0 +1,131 @@
+<div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+    <div>
+        <h1 class="h3 fw-bold text-dark mb-0">Área do Aluno</h1>
+        <small class="text-secondary">Visão geral do atleta e controle de acesso à arena</small>
+    </div>
+    <div>
+        <form action="/logout" method="POST" class="d-inline">
+            <button type="submit" class="btn btn-outline-danger btn-sm">
+                <i class="bi bi-box-arrow-right"></i> Sair da Conta
+            </button>
+        </form>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <!-- Card do Perfil e Status de Acesso -->
+    <div class="col-md-5">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-dark text-white fw-semibold">
+                <i class="bi bi-person-badge"></i> Credencial do Atleta
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-3">
+                    <div class="display-4 text-primary"><i class="bi bi-person-circle"></i></div>
+                    <h5 class="fw-bold mb-1"><?= htmlspecialchars($user ? $user->name : 'Aluno') ?></h5>
+                    <p class="text-muted small"><?= htmlspecialchars($user ? $user->email : '') ?></p>
+                </div>
+
+                <ul class="list-group list-group-flush mb-3">
+                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                        <span>Status de Acesso:</span>
+                        <?php if ($user && $user->isActive()) : ?>
+                            <span class="badge bg-success px-3 py-2">ATIVO - ACESSO LIBERADO</span>
+                        <?php else : ?>
+                            <span class="badge bg-danger px-3 py-2">BLOQUEADO POR INADIMPLÊNCIA</span>
+                        <?php endif; ?>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                        <span>Perfil (Role):</span>
+                        <span class="badge bg-secondary"><?= htmlspecialchars($user ? strtoupper($user->role) : 'STUDENT') ?></span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                        <span>Telefone:</span>
+                        <span class="text-dark fw-semibold"><?= htmlspecialchars($user ? ($user->phone ?? 'Não informado') : '') ?></span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                        <span>Último Login:</span>
+                        <span class="text-muted small"><?= htmlspecialchars($user ? ($user->last_login_at ?? 'Agora') : 'Agora') ?></span>
+                    </li>
+                </ul>
+
+                <div class="alert <?= ($user && $user->isActive()) ? 'alert-success' : 'alert-danger' ?> mb-0 small">
+                    <i class="bi <?= ($user && $user->isActive()) ? 'bi-check-circle' : 'bi-exclamation-octagon' ?>"></i>
+                    <?= ($user && $user->isActive()) 
+                        ? 'Seu acesso às quadras de areia está plenamente regularizado.' 
+                        : 'Acesso bloqueado automaticamente. Regularize suas mensalidades para reativar seu acesso.' ?>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Faturas e Mensalidades -->
+    <div class="col-md-7">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white fw-semibold d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-receipt"></i> Minhas Mensalidades</span>
+                <span class="badge bg-light text-dark border">Ciclo Recorrente</span>
+            </div>
+            <div class="card-body">
+                <?php if (empty($invoices)) : ?>
+                    <p class="text-muted small">Nenhuma fatura encontrada para este atleta.</p>
+                <?php else : ?>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Fatura</th>
+                                    <th>Vencimento</th>
+                                    <th>Valor</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($invoices as $inv) : ?>
+                                    <tr>
+                                        <td>#<?= $inv['id'] ?> Mensalidade</td>
+                                        <td><?= date('d/m/Y', strtotime($inv['due_date'])) ?></td>
+                                        <td class="fw-bold">R$ <?= number_format((float)$inv['amount'], 2, ',', '.') ?></td>
+                                        <td>
+                                            <?php if ($inv['status'] === 'paid') : ?>
+                                                <span class="badge bg-success">PAGA</span>
+                                            <?php elseif ($inv['status'] === 'pending') : ?>
+                                                <span class="badge bg-warning text-dark">PENDENTE</span>
+                                            <?php else : ?>
+                                                <span class="badge bg-danger">ATRASADA</span>
+                                            <?php endif; ?>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quadras Disponíveis -->
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white fw-semibold">
+        <i class="bi bi-grid-3x3-gap"></i> Quadras da Arena Disponíveis para Treino e Jogo
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+            <?php foreach ($courts as $court) : ?>
+                <div class="col-md-4">
+                    <div class="border rounded-3 p-3 bg-light">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h6 class="fw-bold mb-0"><?= htmlspecialchars($court['name']) ?></h6>
+                            <span class="badge <?= ($court['status'] === 'available') ? 'bg-success' : 'bg-warning text-dark' ?>">
+                                <?= ($court['status'] === 'available') ? 'DISPONÍVEL' : 'MANUTENÇÃO' ?>
+                            </span>
+                        </div>
+                        <small class="text-muted d-block"><i class="bi bi-sun"></i> Modalidade: Beach Tennis</small>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+</div>

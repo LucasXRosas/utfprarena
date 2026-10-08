@@ -1,101 +1,171 @@
-# Gerenciamento de Arena de Beach Tennis (Back-End)
+# 🎾 UTFPR Arena Beach Tennis — Backend Framework
 
-> **Tecnologias principais:**  PHP 8.x |  Composer |  SQL (Banco Relacional)
-
-Este é o sistema de back-end focado no **Gerenciamento de Arenas de Beach Tennis**, desenvolvido como projeto universitário. A API controla de forma automatizada o fluxo cadastral de atletas, faturamento de mensalidades e restrições de acessos baseadas em inadimplência financeira.
-
----
-
-## Escopo do Projeto
-
-O sistema resolve um dos principais gargalos de gestão de complexos esportivos: a inadimplência. Através de um motor de regras, o back-end bloqueia automaticamente o acesso de alunos com mensalidades significativamente atrasadas e reativa o acesso de forma instantânea assim que o pagamento é identificado.
+> **Disciplina:** TSI34D — Frameworks Web / Backend  
+> **Arquitetura Base:** Template Oficial UTFPR `tsi34d-framework-template`  
+> **Linguagem & Ambiente:** PHP 8.3 | Nginx | MySQL 8.4 | Docker & Docker Compose | Selenium WebDriver  
+> **Documentação Completa (Wiki):** [https://github.com/LucasXRosas/utfprarena/wiki](https://github.com/LucasXRosas/utfprarena/wiki)
 
 ---
 
-## Objetivos do Projeto
+## 📌 1. Apresentação da Funcionalidade
 
-O objetivo principal deste projeto é desenvolver uma API de back-end robusta e escalável, utilizando o ecossistema PHP, capaz de centralizar e automatizar a gestão operacional e financeira de complexos esportivos de Beach Tennis. A plataforma atua de forma estratégica através dos seguintes objetivos específicos:
+### 1.1 Propósito e Importância no Sistema
+O **UTFPR Arena** é um sistema de gerenciamento de arenas esportivas de *Beach Tennis*. O sistema automatiza o controle de acesso de atletas às quadras de areia, o ciclo de faturamento recorrente de mensalidades e a mitigação ativa de inadimplência:
+- **Catraca Lógica de Acesso:** O sistema bloqueia automaticamente o acesso de alunos com pendências financeiras prolongadas (mais de 2 meses de atraso).
+- **Reativação Instantânea:** Assim que as faturas em aberto são quitadas, o motor de regras restabelece o status do atleta para `ATIVO` em tempo real.
+- **Segurança e Isolamento:** Implementação robusta de autenticação baseada em sessões com hashes de senha seguros via BCrypt, proteção contra *Session Fixation* e controle de acesso baseado em papéis (RBAC).
 
-* **Automação do Fluxo de Caixa:** Substituir processos manuais de cobrança por um ciclo automatizado de faturamento recorrente, garantindo previsibilidade financeira para a arena.
-* **Mitigação Ativa da Inadimplência:** Implementar um motor de regras estritas que monitora o status de pagamento em tempo real, aplicando restrições lógicas de acesso (bloqueio automático) assim que o teto de tolerância (2 meses de atraso) é atingido.
-* **Segurança e Rastreabilidade de Acessos:** Garantir a integridade dos dados e o controle de acesso ao ecossistema através de autenticação tradicional segura e arquitetura baseada em tokens (JWT), impedindo o uso da infraestrutura por usuários irregulares.
-* **Reativação Instantânea de Operações:** Eliminar o gargalo operacional do desbloqueio manual, restabelecendo as permissões e o status ativo do aluno de forma imediata assim que a pendência financeira mínima for liquidada.
-
----
-
-## Impacto Esperado
-
-A implementação da API do projeto Arena UTFPR trará um impacto positivo direto tanto para a gestão do complexo esportivo quanto para a experiência dos praticantes:
-
-- **Para a Gestão e Organização:**
-  - **Redução Significativa da Inadimplência:** O motor automatizado de bloqueio reduz o risco de uso continuado das instalações por usuários com pendências financeiras prolongadas, protegendo a saúde financeira e o fluxo de caixa do empreendimento.
-  - **Eficiência Operacional:** Elimina a necessidade de conferência manual de planilhas e extratos por parte dos administradores, liberando a equipe para focar no atendimento, manutenção das quadras e expansão do negócio.
-  - **Decisões Baseadas em Dados:** Centraliza o histórico financeiro e relatórios de alunos, permitindo um acompanhamento preciso da receita e da taxa de adimplência.
-
-- **Para os Usuários (Alunos e Professores):**
-  - **Transparência e Autonomia:** Alunos ganham visibilidade clara sobre o status de suas mensalidades e histórico financeiro, sabendo exatamente suas obrigações sem constrangimentos presenciais.
-  - **Desbloqueio Instantâneo:** Ao regularizar débitos, o acesso e a permissão de reserva de quadras são reestabelecidos de forma imediata e automatizada, sem depender da intervenção de um atendente.
-  - **Previsibilidade:** A régua de cobrança preventiva alerta os alunos em prazos estratégicos (0, 7, 14 e 21 dias), evitando bloqueios surpresa.
+### 1.2 Diferenças de Ações entre os Tipos de Usuários
+| Tipo de Usuário | Papel (`role`) | Área Exclusiva | Permissões e Ações Permitidas |
+|---|---|---|---|
+| **Visitante** | Não autenticado | `/` e `/login` | Visualizar página inicial pública e efetuar login. Bloqueado de qualquer área restrita. |
+| **Aluno (Atleta)** | `student` | `/dashboard` | Visualizar credencial de acesso ("Apto para Jogar"), histórico de mensalidades e quadras disponíveis da arena. |
+| **Administrador (Gestor)** | `manager` | `/admin` | Acesso ao Painel Gerencial, métricas de faturamento e atletas, e controle manual de status (bloquear / ativar atleta). |
 
 ---
 
-## Diretrizes de Escopo
+## 🚀 2. Passo a Passo para Executar o Projeto
 
-### Problemas Identificados (Justificativa)
-No cenário real de gestão de arenas de Beach Tennis, foram mapeadas as seguintes dores que o sistema visa solucionar:
-* **Evasão de Receita por Inadimplência:** Alunos frequentando as quadras de areia e utilizando os espaços mesmo com mensalidades atrasadas por longos períodos.
-* **Sobrecarga na Gestão Manual:** Administradores gastando tempo revisando planilhas para descobrir quem pagou, quem está devendo e quem deve ter o acesso barrado.
-* **Falhas de Segurança no Acesso:** Falta de um controle digital centralizado, permitindo que usuários não cadastrados ou irregulares utilizem as dependências da arena sem validação prévia.
-
-### Fora de Escopo (O que o sistema NÃO faz)
-Para garantir a entrega do projeto dentro do prazo letivo da universidade, as seguintes funcionalidades foram explicitamente definidas como fora de escopo do back-end:
-* **Desenvolvimento de Interface Visual (Front-End):** O projeto limita-se estritamente ao desenvolvimento da API (rotas, regras e banco de dados), não incluindo telas, aplicativos mobile ou interfaces web.
-* **Integração Real com Gateways de Pagamento:** O sistema não fará chamadas reais para operadoras de cartão ou bancos (ex: API do Stripe, Mercado Pago ou bancos tradicionais). Os pagamentos serão simulados via endpoints de testes ou webhooks mockados.
-* **Gateway Físico de Catracas:** O bloqueio é lógico (rejeição de requisições na API). O projeto não contempla a integração com hardware de catracas físicas ou leitores biométricos de portarias.
-* **Agendamento Avulso de Quadras por Não-Alunos:** O sistema foca no modelo de mensalistas regulares da arena. Aluguéis avulsos de quadras por usuários externos não serão processados nesta versão.
+### Pré-requisitos
+- [Docker](https://docs.docker.com/engine/install/) instalado
+- [Docker Compose](https://docs.docker.com/compose/install/) instalado
 
 ---
 
-## Funcionalidades Chave
-
-* **Autenticação Segura:** Fluxo tradicional de cadastro e login com criptografia e tokens de sessão.
-* **Gestão de Mensalidades:** Geração de faturas mensais e controle do fluxo de caixa dos alunos.
-* **Bloqueio Automatizado:** Motor de regras que restringe o acesso de alunos com mais de 2 meses de mensalidades em atraso.
-
----
-
-## Lógica das Regras de Negócio
-
-* **Regra de Bloqueio (Lote):** Um script automático (Cron Job/CLI) varre o banco de dados diariamente. Se um aluno ativo possuir **2 ou mais faturas vencidas**, seu status é alterado para `BLOQUEADO`.
-* **Regra de Reativação (Gatilho):** No momento em que o aluno realiza o pagamento e o número de faturas vencidas cai para **menos de 2** (apenas 1 ou nenhuma), o back-end altera seu status imediatamente para `ATIVO`.
-
----
-
-## Stack Técnica e Arquitetura
-
-* **Linguagem:** PHP 8.x (Orientado a Objetos)
-* **Persistência:** Driver PDO para conexão segura com Banco de Dados Relacional.
-* **Gerenciador de Dependências:** Composer
-
----
-
-## Como Executar o Projeto Localmente
-
-### 1. Pré-requisitos
-* PHP 8.x instalado localmente.
-* Composer instalado.
-* Banco de Dados Relacional configurado (MySQL/PostgreSQL).
-
-### 2. Clonar o repositório
+### Passo 1: Clonar o Repositório
 ```bash
-git clone https://github.com/LucasXRosas/utfprarena
+git clone https://github.com/LucasXRosas/utfprarena.git
 cd utfprarena
 ```
 
-### 3. Instalar as dependências do PHP
+### Passo 2: Configurar o Arquivo de Ambiente (`.env`)
+Copie o arquivo de exemplo de variáveis de ambiente:
 ```bash
-composer install
+cp .env.example .env
 ```
 
-## Documentação Detalhada (Wiki)
-Para acessar os diagramas de banco de dados, dicionário de tabelas, requisitos de software (RF/RNF) e detalhes do código PHP das regras, consulte a nossa [Wiki do GitHub](../../wiki).
+### Passo 3: Instalar as Dependências do PHP (Composer via Docker)
+Utilize o runner do projeto para baixar e instalar as dependências dentro do contêiner isolado:
+```bash
+./run composer install
+```
+
+### Passo 4: Subir os Contêineres da Aplicação
+Inicie os serviços do Docker (Nginx, PHP-FPM, MySQL e Selenium):
+```bash
+./run up -d
+```
+*(ou equivalentemente: `docker compose up -d`)*
+
+Para checar se todos os contêineres subiram com sucesso:
+```bash
+./run ps
+```
+
+### Passo 5: Criar o Banco de Dados e as Tabelas
+Execute o reset do schema MySQL para criar as tabelas `users`, `courts` e `invoices`:
+```bash
+./run db:reset
+```
+
+### Passo 6: Popular o Banco de Dados com Dados Iniciais (Seeds)
+Execute o script de população para semear os perfis da demonstração (Admin, Aluno Ativo, Aluno Inadimplente, quadras e faturas):
+```bash
+./run db:populate
+```
+
+### Passo 7: Configurar Permissões de Uploads (Opcional)
+```bash
+sudo chown -R www-data:www-data public/assets/uploads
+```
+
+### Passo 8: Acessar a Aplicação
+Abra seu navegador em:
+👉 **[http://localhost:8080](http://localhost:8080)** *(ou [http://localhost](http://localhost))*
+
+---
+
+## 🔑 3. Dados de Acesso Pré-configurados (Seeds)
+
+| Perfil | E-mail | Senha | Área Redirecionada | Cenário de Demonstração |
+|---|---|---|---|---|
+| **Administrador** | `admin@arena.com` | `admin123` | `/admin` | Acesso completo ao painel gerencial e bloqueio de usuários. |
+| **Aluno Ativo** | `aluno@arena.com` | `aluno123` | `/dashboard` | Acesso regular liberado às quadras e faturas em dia. |
+| **Aluno Inadimplente** | `bloqueado@arena.com` | `aluno123` | N/A (Bloqueado) | Demonstração de bloqueio imediato na tela de login por pendência financeira. |
+
+---
+
+## 🧪 4. Execução dos Testes Automatizados
+
+O projeto conta com suíte completa de testes automatizados conforme a rubrica de avaliação:
+
+### 4.1 Testes Unitários e de Integração (PHPUnit)
+Executa todos os testes de Models, Libs, Core e Acesso a Rotas:
+```bash
+./run test
+```
+
+Para rodar apenas os testes unitários de Models:
+```bash
+./run test tests/Unit/Models
+```
+
+Para rodar apenas os testes de integração de acesso a rotas:
+```bash
+./run test tests/Integration/Access
+```
+
+### 4.2 Testes de Aceitação / End-to-End (Codeception + Selenium)
+Executa a bateria de testes de navegador simulando os 4 fluxos exigidos na rubrica:
+```bash
+./run test:browser
+```
+*(ou equivalentemente: `./run codecept run acceptance`)*
+
+---
+
+## 🔍 5. Linters e Análise Estática de Código
+
+Para garantir conformidade rigorosa com PSR-12 e tipagem estática nível 6:
+
+- **PHP CodeSniffer (PSR-12):**
+  ```bash
+  ./run phpcs
+  ```
+  *(Para correção automática: `./run phpcbf`)*
+
+- **PHPStan (Análise Estática Nível 6):**
+  ```bash
+  ./run phpstan
+  ```
+
+---
+
+## 📡 6. Testes de API (cURL / HTTP REST)
+
+### 6.1 Rota Não Autenticada (Bloqueio 401)
+```bash
+curl -i -H "Accept: application/json" http://localhost:8080/dashboard
+```
+**Resposta esperada:** `HTTP/1.1 401 Unauthorized` com JSON `{ "error": "Não autenticado", "code": 401 }`.
+
+### 6.2 Rota Autenticada com Sessão (Status 200)
+Substitua pelo ID da sessão retornado no cookie após login:
+```bash
+curl -i -H "Accept: application/json" -b "PHPSESSID=SEU_SESSION_ID_AQUI" http://localhost:8080/dashboard
+```
+**Resposta esperada:** `HTTP/1.1 200 OK`.
+
+---
+
+## 📚 7. Roteiro e Guia de Apresentação da Rubrica
+
+Para detalhes aprofundados sobre **todos os pontos avaliados na rubrica**:
+- Roteiro de demonstração prática clique a clique (Admin e Aluno)
+- Explicação de conceitos com referências de livros (Stallings, Tanenbaum, Kurose, Lockhart, GoF, Ross Anderson)
+- Modelagem de dados e segurança (BCrypt, tokens, timestamps)
+- Explicação do funcionamento do Framework (`Route::middleware('auth')->group(...)` e `FlashMessage`)
+- Diretrizes de Pull Request e Conventional Commits
+
+Consulte o documento completo:  
+👉 **[docs/GUIA_APRESENTACAO_RUBRICA.md](file:///home/lucas/Documents/UTFPR/backend/project/utfprarena/docs/GUIA_APRESENTACAO_RUBRICA.md)**

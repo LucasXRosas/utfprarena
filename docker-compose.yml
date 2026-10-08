@@ -1,59 +1,78 @@
 services:
-  app:
+  web:
+    image: nginx:latest
+    working_dir: /var/www
+    volumes:
+      - .:/var/www
+      - ./server/nginx.conf:/etc/nginx/conf.d/default.conf
+    ports:
+      - 80:80
+      - 8080:8080
+    networks:
+      - app-network
+    depends_on:
+      - php
+      - php_test
+      
+  php:
     build:
       context: .
-      dockerfile: docker/php/Dockerfile
-    container_name: utfprarena_app
-    restart: unless-stopped
-    working_dir: /var/www/html
+      dockerfile: Dockerfile
+    working_dir: /var/www
     volumes:
-      - ./:/var/www/html
-    environment:
-      APP_ENV: ${APP_ENV:-development}
-      APP_DEBUG: ${APP_DEBUG:-true}
-      DB_HOST: db
-      DB_PORT: 5432
-      DB_DATABASE: ${DB_DATABASE:-utfprarena}
-      DB_USERNAME: ${DB_USERNAME:-utfpr}
-      DB_PASSWORD: ${DB_PASSWORD:-arena_secret}
+      - .:/var/www
+      - ./php/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
     networks:
-      - arena_network
+      - app-network
     depends_on:
       - db
 
-  nginx:
-    image: nginx:alpine
-    container_name: utfprarena_nginx
-    restart: unless-stopped
-    ports:
-      - "8080:80"
-    volumes:
-      - ./:/var/www/html
-      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
-    networks:
-      - arena_network
-    depends_on:
-      - app
-
   db:
-    image: postgres:16-alpine
-    container_name: utfprarena_db
-    restart: unless-stopped
+    image: mysql:8.4.0
+    env_file:
+      - .env
     environment:
-      POSTGRES_DB: ${DB_DATABASE:-utfprarena}
-      POSTGRES_USER: ${DB_USERNAME:-utfpr}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-arena_secret}
-    ports:
-      - "5432:5432"
+      MYSQL_DATABASE: "$DB_DATABASE"
+      MYSQL_USER: "$DB_USERNAME"
+      MYSQL_PASSWORD: "$DB_PASSWORD"
+      MYSQL_ALLOW_EMPTY_PASSWORD: yes
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - dbdata:/var/lib/mysql
     networks:
-      - arena_network
+      - app-network
+
+  selenium:
+    image: selenium/standalone-chrome-debug:latest
+    ports:
+      - 4444:4444
+      - 5900:5900
+    networks:
+      - app-network
+
+  php_test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    working_dir: /var/www
+    volumes:
+      - .:/var/www
+      - ./php/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
+    networks:
+      - app-network
+    depends_on:
+      - db
+      - selenium
+    environment:
+      APP_ENV: testing
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_DATABASE: arena_test
+      DB_USERNAME: root
+      DB_PASSWORD: ""
 
 networks:
-  arena_network:
+  app-network:
     driver: bridge
 
 volumes:
-  postgres_data:
-    driver: local
+  dbdata:
