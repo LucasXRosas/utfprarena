@@ -10,8 +10,8 @@
 ## 1. Apresentação da Funcionalidade
 
 ### 1.1 Propósito e Importância no Sistema
-O **UTFPR Arena** é um sistema de gerenciamento de arenas esportivas de *Beach Tennis*. O sistema automatiza o controle de acesso de atletas às quadras de areia, o ciclo de faturamento recorrente de mensalidades e a mitigação ativa de inadimplência:
-- **Catraca Lógica de Acesso:** O sistema bloqueia automaticamente o acesso de alunos com pendências financeiras prolongadas (mais de 2 meses de atraso).
+O **UTFPR Arena** é um sistema de gerenciamento de arenas esportivas de *Beach Tennis*. O sistema automatiza o controle de acesso, o ciclo de faturamento recorrente de mensalidades e a mitigação ativa de inadimplência:
+- **Lógica de Acesso:** O sistema bloqueia automaticamente o acesso de alunos com pendências financeiras prolongadas (mais de 1 mês de atraso).
 - **Reativação Instantânea:** Assim que as faturas em aberto são quitadas, o motor de regras restabelece o status do atleta para `ATIVO` em tempo real.
 - **Segurança e Isolamento:** Implementação robusta de autenticação baseada em sessões com hashes de senha seguros via BCrypt, proteção contra *Session Fixation* e controle de acesso baseado em papéis (RBAC).
 
@@ -158,17 +158,3 @@ Substitua pelo ID da sessão retornado no cookie após login:
 curl -i -H "Accept: application/json" -b "PHPSESSID=SEU_SESSION_ID_AQUI" http://localhost:8080/dashboard
 ```
 **Resposta esperada:** `HTTP/1.1 200 OK`.
-
----
-
-## 7. Roteiro e Guia de Apresentação da Rubrica
-
-Para detalhes aprofundados sobre **todos os pontos avaliados na rubrica**:
-- Roteiro de demonstração prática clique a clique (Admin e Aluno)
-- Explicação de conceitos com referências de livros (Stallings, Tanenbaum, Kurose, Lockhart, GoF, Ross Anderson)
-- Modelagem de dados e segurança (BCrypt, tokens, timestamps)
-- Explicação do funcionamento do Framework (`Route::middleware('auth')->group(...)` e `FlashMessage`)
-- Diretrizes de Pull Request e Conventional Commits
-
-Consulte o documento completo:  
-**[docs/GUIA_APRESENTACAO_RUBRICA.md](file:///home/lucas/Documents/UTFPR/backend/project/utfprarena/docs/GUIA_APRESENTACAO_RUBRICA.md)**
