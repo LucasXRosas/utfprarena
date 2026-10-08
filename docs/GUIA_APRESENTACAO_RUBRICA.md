@@ -1,4 +1,4 @@
-# 🎓 Guia Completo de Apresentação e Defesa Oral da Rubrica — UTFPR Arena
+# Guia Completo de Apresentação e Defesa Oral da Rubrica — UTFPR Arena
 **Sistema:** UTFPR Arena Beach Tennis — Gerenciamento e Controle de Acesso às Quadras  
 **Framework Base:** `tsi34d-framework-template` (UTFPR TSI34D)  
 **Repositório:** [https://github.com/LucasXRosas/utfprarena](https://github.com/LucasXRosas/utfprarena)  
@@ -6,7 +6,7 @@
 
 ---
 
-## 📋 Sumário Executivo da Apresentação
+## Sumário Executivo da Apresentação
 Este documento é o roteiro completo de estudo e fala para a apresentação do trabalho prático perante o professor e avaliadores. Ele aborda cada item da tabela de avaliação da rubrica, seus fundamentos teóricos com citações bibliográficas de livros, demonstração prática, análise de código e testes automatizados.
 
 ---
@@ -332,10 +332,10 @@ feature/auth-rbac-and-security
 
 ### 7.4 Modelo de Descrição da PR (Markdown para o GitHub)
 ```markdown
-## 📌 Descrição da Pull Request
+## Descrição da Pull Request
 Esta PR implementa o módulo completo de Autenticação, Autorização e Segurança do sistema UTFPR Arena, em conformidade total com a arquitetura `tsi34d-framework-template` e os critérios da rubrica de avaliação.
 
-### 🚀 O que foi implementado:
+### O que foi implementado:
 1. **Adequação ao Framework Template:**
    - Estrutura de diretórios `app/`, `core/`, `lib/`, `config/`, `database/`, `tests/` e runner `./run`.
    - Containerização com Nginx, PHP 8.3 FPM, MySQL 8.4 e Selenium.

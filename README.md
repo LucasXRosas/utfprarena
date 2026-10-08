@@ -1,4 +1,4 @@
-# 🎾 UTFPR Arena Beach Tennis — Backend Framework
+# UTFPR Arena Beach Tennis — Backend Framework
 
 > **Disciplina:** TSI34D — Frameworks Web / Backend  
 > **Arquitetura Base:** Template Oficial UTFPR `tsi34d-framework-template`  
@@ -7,7 +7,7 @@
 
 ---
 
-## 📌 1. Apresentação da Funcionalidade
+## 1. Apresentação da Funcionalidade
 
 ### 1.1 Propósito e Importância no Sistema
 O **UTFPR Arena** é um sistema de gerenciamento de arenas esportivas de *Beach Tennis*. O sistema automatiza o controle de acesso de atletas às quadras de areia, o ciclo de faturamento recorrente de mensalidades e a mitigação ativa de inadimplência:
@@ -24,7 +24,7 @@ O **UTFPR Arena** é um sistema de gerenciamento de arenas esportivas de *Beach 
 
 ---
 
-## 🚀 2. Passo a Passo para Executar o Projeto
+## 2. Passo a Passo para Executar o Projeto
 
 ### Pré-requisitos
 - [Docker](https://docs.docker.com/engine/install/) instalado
@@ -81,11 +81,14 @@ sudo chown -R www-data:www-data public/assets/uploads
 
 ### Passo 8: Acessar a Aplicação
 Abra seu navegador em:
-👉 **[http://localhost:8080](http://localhost:8080)** *(ou [http://localhost](http://localhost))*
+**[http://localhost:8000](http://localhost:8000)** *(porta principal — backend PHP normal)*  
+**[http://localhost:8080](http://localhost:8080)** *(porta de testes — ambiente isolado)*
+
+> **Nota:** Caso a porta `80` esteja livre na sua máquina, você pode reverter o `docker-compose.yml` para `80:80` e acessar via `http://localhost`.
 
 ---
 
-## 🔑 3. Dados de Acesso Pré-configurados (Seeds)
+## 3. Dados de Acesso Pré-configurados (Seeds)
 
 | Perfil | E-mail | Senha | Área Redirecionada | Cenário de Demonstração |
 |---|---|---|---|---|
@@ -95,7 +98,7 @@ Abra seu navegador em:
 
 ---
 
-## 🧪 4. Execução dos Testes Automatizados
+## 4. Execução dos Testes Automatizados
 
 O projeto conta com suíte completa de testes automatizados conforme a rubrica de avaliação:
 
@@ -124,7 +127,7 @@ Executa a bateria de testes de navegador simulando os 4 fluxos exigidos na rubri
 
 ---
 
-## 🔍 5. Linters e Análise Estática de Código
+## 5. Linters e Análise Estática de Código
 
 Para garantir conformidade rigorosa com PSR-12 e tipagem estática nível 6:
 
@@ -141,7 +144,7 @@ Para garantir conformidade rigorosa com PSR-12 e tipagem estática nível 6:
 
 ---
 
-## 📡 6. Testes de API (cURL / HTTP REST)
+## 6. Testes de API (cURL / HTTP REST)
 
 ### 6.1 Rota Não Autenticada (Bloqueio 401)
 ```bash
@@ -158,7 +161,7 @@ curl -i -H "Accept: application/json" -b "PHPSESSID=SEU_SESSION_ID_AQUI" http://
 
 ---
 
-## 📚 7. Roteiro e Guia de Apresentação da Rubrica
+## 7. Roteiro e Guia de Apresentação da Rubrica
 
 Para detalhes aprofundados sobre **todos os pontos avaliados na rubrica**:
 - Roteiro de demonstração prática clique a clique (Admin e Aluno)
@@ -168,4 +171,4 @@ Para detalhes aprofundados sobre **todos os pontos avaliados na rubrica**:
 - Diretrizes de Pull Request e Conventional Commits
 
 Consulte o documento completo:  
-👉 **[docs/GUIA_APRESENTACAO_RUBRICA.md](file:///home/lucas/Documents/UTFPR/backend/project/utfprarena/docs/GUIA_APRESENTACAO_RUBRICA.md)**
+**[docs/GUIA_APRESENTACAO_RUBRICA.md](file:///home/lucas/Documents/UTFPR/backend/project/utfprarena/docs/GUIA_APRESENTACAO_RUBRICA.md)**
