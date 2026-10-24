@@ -28,10 +28,30 @@ class AuthController extends Controller
 
     public function create(Request $request): void
     {
-        $params = $request->getParams();
-        $email = trim((string) ($params['user']['email'] ?? $params['email'] ?? ''));
-        $password = (string) ($params['user']['password'] ?? $params['password'] ?? '');
+        // 1. Identificar explicitamente a presença dos parâmetros obrigatórios
+        // Evita o uso de valores padrão silenciosos ($params['email'] ?? '') para mascarar chaves ausentes
+        $hasEmail = $request->hasParam('user.email') || $request->hasParam('email');
+        $hasPassword = $request->hasParam('user.password') || $request->hasParam('password');
 
+        if (!$hasEmail || !$hasPassword) {
+            FlashMessage::danger('Parâmetros obrigatórios ausentes: informe email e senha.');
+            $this->redirectTo(route('users.login'));
+            return;
+        }
+
+        // 2. Extração segura dos parâmetros confirmados
+        $rawEmail = $request->hasParam('user.email')
+            ? $request->getParam('user.email')
+            : $request->getParam('email');
+
+        $rawPassword = $request->hasParam('user.password')
+            ? $request->getParam('user.password')
+            : $request->getParam('password');
+
+        $email = trim((string) $rawEmail);
+        $password = (string) $rawPassword;
+
+        // 3. Validação de conteúdo: campos enviados não podem ser vazios
         if ($email === '' || $password === '') {
             FlashMessage::danger('Email e senha são obrigatórios.');
             $this->redirectTo(route('users.login'));

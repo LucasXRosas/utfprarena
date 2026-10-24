@@ -93,4 +93,32 @@ class RequestTest extends TestCase
         $this->assertEquals('John Doe', $request->getParam('name', 'Jane Doe'));
         $this->assertEquals('Jane Doe', $request->getParam('age', 'Jane Doe'));
     }
+
+    public function test_has_param_and_nested_dot_notation(): void
+    {
+        $_REQUEST = [
+            'email' => 'test@example.com',
+            'user' => [
+                'name' => 'John',
+                'profile' => [
+                    'role' => 'admin'
+                ]
+            ]
+        ];
+        $request = new Request();
+
+        $this->assertTrue($request->hasParam('email'));
+        $this->assertTrue($request->hasParam('user.name'));
+        $this->assertTrue($request->hasParam('user.profile.role'));
+        $this->assertFalse($request->hasParam('password'));
+        $this->assertFalse($request->hasParam('user.age'));
+
+        $this->assertEquals('test@example.com', $request->getParam('email'));
+        $this->assertEquals('John', $request->getParam('user.name'));
+        $this->assertEquals('admin', $request->getParam('user.profile.role'));
+        $this->assertNull($request->getParam('user.missing'));
+
+        $this->assertTrue($request->hasParams(['email', 'user.name']));
+        $this->assertFalse($request->hasParams(['email', 'user.missing']));
+    }
 }

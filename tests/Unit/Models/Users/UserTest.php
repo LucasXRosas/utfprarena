@@ -166,4 +166,25 @@ class UserTest extends TestCase
         $this->assertTrue($this->user->isActive());
         $this->assertFalse($this->user->isBlocked());
     }
+
+    public function test_metrics_count(): void
+    {
+        $this->assertEquals(2, User::countTotal());
+        $this->assertEquals(2, User::countActive());
+        $this->assertEquals(0, User::countBlocked());
+
+        $this->user2->block();
+        $this->user2->save();
+
+        $this->assertEquals(2, User::countTotal());
+        $this->assertEquals(1, User::countActive());
+        $this->assertEquals(1, User::countBlocked());
+    }
+
+    public function test_user_invoices_relationship(): void
+    {
+        $invoices = $this->user->invoices();
+        $this->assertInstanceOf(\Core\Database\ActiveRecord\HasMany::class, $invoices);
+        $this->assertEmpty($this->user->getInvoices());
+    }
 }

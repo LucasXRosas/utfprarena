@@ -1,0 +1,126 @@
+<div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+    <div>
+        <h1 class="h3 fw-bold text-dark mb-0">Credencial do Atleta #<?= $targetUser->id ?></h1>
+        <small class="text-secondary">Visualização completa do perfil e histórico financeiro na UTFPR Arena</small>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="/admin/users/<?= $targetUser->id ?>/edit" class="btn btn-primary btn-sm">
+            <i class="bi bi-pencil-square"></i> Editar Atleta
+        </a>
+        <a href="/admin/users" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left"></i> Voltar à Lista
+        </a>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Informações do Usuário -->
+    <div class="col-md-5">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-dark text-white fw-semibold">
+                <i class="bi bi-person-badge"></i> Dados Cadastrais
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-3">
+                    <div class="display-4 text-primary"><i class="bi bi-person-circle"></i></div>
+                    <h5 class="fw-bold mb-1" id="athlete_name"><?= htmlspecialchars($targetUser->name) ?></h5>
+                    <p class="text-muted small" id="athlete_email"><?= htmlspecialchars($targetUser->email) ?></p>
+                </div>
+
+                <ul class="list-group list-group-flush mb-3">
+                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                        <span>Status Catraca:</span>
+                        <?php if ($targetUser->isActive()) : ?>
+                            <span class="badge bg-success px-3 py-2"><i class="bi bi-check-circle"></i> ATIVO (LIBERADO)</span>
+                        <?php else : ?>
+                            <span class="badge bg-danger px-3 py-2"><i class="bi bi-lock-fill"></i> BLOQUEADO</span>
+                        <?php endif; ?>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                        <span>Perfil (Role):</span>
+                        <span class="badge <?= $targetUser->isAdmin() ? 'bg-danger' : 'bg-secondary' ?>">
+                            <?= strtoupper($targetUser->role) ?>
+                        </span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                        <span>Telefone:</span>
+                        <span class="text-dark fw-semibold"><?= htmlspecialchars($targetUser->phone ?? 'Não informado') ?></span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                        <span>CPF:</span>
+                        <span class="text-dark fw-semibold"><?= htmlspecialchars($targetUser->cpf ?? 'Não informado') ?></span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                        <span>Último Login:</span>
+                        <span class="text-muted small"><?= htmlspecialchars($targetUser->last_login_at ?? 'Nunca realizou login') ?></span>
+                    </li>
+                </ul>
+
+                <div class="d-grid gap-2">
+                    <?php if ($targetUser->isActive()) : ?>
+                        <form action="/admin/users/<?= $targetUser->id ?>/block" method="POST" class="d-grid">
+                            <button type="submit" class="btn btn-outline-warning btn-sm">
+                                <i class="bi bi-lock-fill"></i> Bloquear Acesso à Arena
+                            </button>
+                        </form>
+                    <?php else : ?>
+                        <form action="/admin/users/<?= $targetUser->id ?>/activate" method="POST" class="d-grid">
+                            <button type="submit" class="btn btn-outline-success btn-sm">
+                                <i class="bi bi-unlock-fill"></i> Liberar Acesso à Arena
+                            </button>
+                        </form>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Faturas e Mensalidades do Atleta -->
+    <div class="col-md-7">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white fw-semibold d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-receipt"></i> Histórico Financeiro do Atleta</span>
+                <span class="badge bg-light text-dark border">Controle de Inadimplência</span>
+            </div>
+            <div class="card-body">
+                <?php if (empty($invoices)) : ?>
+                    <div class="text-center py-4 text-muted">
+                        <i class="bi bi-check2-circle fs-2 text-success d-block mb-2"></i>
+                        <p class="mb-0">Nenhuma fatura em aberto ou registrada para este atleta.</p>
+                    </div>
+                <?php else : ?>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Fatura</th>
+                                    <th>Vencimento</th>
+                                    <th>Valor</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($invoices as $inv) : ?>
+                                    <tr>
+                                        <td>#<?= $inv->id ?> Mensalidade</td>
+                                        <td><?= date('d/m/Y', strtotime($inv->due_date)) ?></td>
+                                        <td class="fw-bold">R$ <?= number_format((float)$inv->amount, 2, ',', '.') ?></td>
+                                        <td>
+                                            <?php if ($inv->isPaid()) : ?>
+                                                <span class="badge bg-success">PAGA</span>
+                                            <?php elseif ($inv->isPending()) : ?>
+                                                <span class="badge bg-warning text-dark">PENDENTE</span>
+                                            <?php else : ?>
+                                                <span class="badge bg-danger">ATRASADA</span>
+                                            <?php endif; ?>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+</div>

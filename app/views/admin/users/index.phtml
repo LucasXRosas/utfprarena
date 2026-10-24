@@ -1,0 +1,167 @@
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4 pb-3 border-bottom">
+    <div>
+        <h1 class="h3 fw-bold text-dark mb-1">Painel Gerencial</h1>
+        <small class="text-secondary">Administração e controle de acesso da UTFPR Arena Beach Tennis</small>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+        <a href="/admin/users/new" class="btn btn-primary btn-sm d-flex align-items-center gap-1 shadow-sm" id="btn_new_user">
+            <i class="bi bi-person-plus-fill"></i> Cadastrar Atleta
+        </a>
+        <span class="badge bg-danger fs-6 d-flex align-items-center px-3 py-2">ADMINISTRADOR</span>
+        <form action="/logout" method="POST" class="d-inline m-0">
+            <button type="submit" class="btn btn-outline-danger btn-sm" id="btn_admin_logout">
+                <i class="bi bi-box-arrow-right"></i> Sair
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Métricas da Arena -->
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm bg-primary text-white p-3 h-100">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="text-white-50 text-uppercase fw-semibold mb-1">Total de Atletas</h6>
+                    <h2 class="display-6 fw-bold mb-0" id="metric_total_users"><?= $totalUsers ?></h2>
+                </div>
+                <div class="fs-1 text-white-50"><i class="bi bi-people"></i></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm bg-success text-white p-3 h-100">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="text-white-50 text-uppercase fw-semibold mb-1">Acessos Liberados</h6>
+                    <h2 class="display-6 fw-bold mb-0" id="metric_active_users"><?= $activeUsers ?></h2>
+                </div>
+                <div class="fs-1 text-white-50"><i class="bi bi-check-circle"></i></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm bg-danger text-white p-3 h-100">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="text-white-50 text-uppercase fw-semibold mb-1">Bloqueados (Inadimplência)</h6>
+                    <h2 class="display-6 fw-bold mb-0" id="metric_blocked_users"><?= $blockedUsers ?></h2>
+                </div>
+                <div class="fs-1 text-white-50"><i class="bi bi-slash-circle"></i></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Gestão de Atletas e Controle de Catraca Lógica -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white fw-semibold d-flex justify-content-between align-items-center py-3">
+        <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-person-lines-fill text-primary"></i>
+            <span class="fs-6">Gestão de Atletas e Controle de Catraca Lógica (CRUD)</span>
+        </div>
+        <div class="d-flex gap-2 align-items-center">
+            <span class="badge bg-light text-secondary border">RESTful Resource: <code>/admin/users</code></span>
+            <span class="badge bg-dark text-white">RBAC &bull; Manager Only</span>
+        </div>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" id="table_users">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-3" style="width: 70px;">ID</th>
+                        <th>Atleta / Contato</th>
+                        <th>E-mail</th>
+                        <th>Papel (Role)</th>
+                        <th>Status Catraca</th>
+                        <th>Último Login</th>
+                        <th class="text-end pe-3" style="min-width: 320px;">Ações de Gestão</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if (empty($users)) : ?>
+                        <tr>
+                            <td colspan="7" class="text-center py-4 text-muted">
+                                Nenhum atleta cadastrado no momento.
+                            </td>
+                        </tr>
+                    <?php else : ?>
+                        <?php foreach ($users as $u) : ?>
+                            <tr id="user_row_<?= $u->id ?>">
+                                <td class="ps-3 fw-bold text-muted">#<?= $u->id ?></td>
+                                <td>
+                                    <div class="fw-semibold text-dark"><?= htmlspecialchars($u->name) ?></div>
+                                    <small class="text-muted d-block">
+                                        <i class="bi bi-telephone"></i> <?= htmlspecialchars($u->phone ?? 'Sem telefone') ?>
+                                        &bull; CPF: <?= htmlspecialchars($u->cpf ?? 'N/I') ?>
+                                    </small>
+                                </td>
+                                <td><code><?= htmlspecialchars($u->email) ?></code></td>
+                                <td>
+                                    <span class="badge <?= $u->isAdmin() ? 'bg-danger' : 'bg-secondary' ?>">
+                                        <?= strtoupper($u->role) ?>
+                                    </span>
+                                </td>
+                                <td>
+                                    <?php if ($u->isActive()) : ?>
+                                        <span class="badge bg-success px-2 py-1"><i class="bi bi-check-circle"></i> ATIVO</span>
+                                    <?php else : ?>
+                                        <span class="badge bg-danger px-2 py-1"><i class="bi bi-lock-fill"></i> BLOQUEADO</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td class="small text-muted"><?= htmlspecialchars($u->last_login_at ?? 'Nunca') ?></td>
+                                <td class="text-end pe-3">
+                                    <div class="d-inline-flex gap-1">
+                                        <!-- Ver Detalhes (Show) -->
+                                        <a href="/admin/users/<?= $u->id ?>" class="btn btn-outline-info btn-sm" title="Visualizar detalhes">
+                                            <i class="bi bi-eye"></i> Detalhes
+                                        </a>
+
+                                        <!-- Editar (Edit) -->
+                                        <a href="/admin/users/<?= $u->id ?>/edit" class="btn btn-outline-primary btn-sm" title="Editar atleta">
+                                            <i class="bi bi-pencil-square"></i> Editar
+                                        </a>
+
+                                        <!-- Alternar Status (Catraca) -->
+                                        <?php if ($u->isActive()) : ?>
+                                            <form action="/admin/users/<?= $u->id ?>/block" method="POST" class="d-inline m-0">
+                                                <button type="submit" class="btn btn-outline-warning btn-sm" title="Bloquear acesso à arena">
+                                                    <i class="bi bi-lock-fill"></i> Bloquear
+                                                </button>
+                                            </form>
+                                        <?php else : ?>
+                                            <form action="/admin/users/<?= $u->id ?>/activate" method="POST" class="d-inline m-0">
+                                                <button type="submit" class="btn btn-outline-success btn-sm" title="Reativar acesso à arena">
+                                                    <i class="bi bi-unlock-fill"></i> Reativar
+                                                </button>
+                                            </form>
+                                        <?php endif; ?>
+
+                                        <!-- Deletar (Destroy) -->
+                                        <?php if ($u->id !== $user?->id) : ?>
+                                            <form action="/admin/users/<?= $u->id ?>" method="POST" class="d-inline m-0" onsubmit="return confirm('Deseja realmente remover o atleta <?= htmlspecialchars(addslashes($u->name)) ?>?');">
+                                                <input type="hidden" name="_method" value="DELETE">
+                                                <button type="submit" class="btn btn-outline-danger btn-sm" id="btn_delete_user_<?= $u->id ?>" title="Excluir atleta">
+                                                    <i class="bi bi-trash"></i> Excluir
+                                                </button>
+                                            </form>
+                                        <?php else : ?>
+                                            <button class="btn btn-outline-secondary btn-sm" disabled title="Você não pode excluir sua própria conta">
+                                                <i class="bi bi-shield-lock"></i> Próprio
+                                            </button>
+                                        <?php endif; ?>
+                                    </div>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="card-footer bg-white py-3 border-top">
+        <!-- Navegação de Páginas (Paginator) -->
+        <?php $paginator->renderPagesNavigation(); ?>
+    </div>
+</div>

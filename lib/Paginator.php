@@ -22,7 +22,8 @@ class Paginator
         private string $table,
         private array $attributes,
         private array $conditions = [],
-        private ?string $route = null
+        private ?string $route = null,
+        private ?string $order = null
     ) {
         $this->loadTotals();
         $this->loadRegisters();
@@ -120,10 +121,12 @@ class Paginator
         $this->offset = $this->per_page * ($this->page - 1);
 
         $attributes = implode(', ', $this->attributes);
+        $orderSql = $this->order !== null ? "ORDER BY {$this->order}" : "";
 
         $sql = <<<SQL
             SELECT id, {$attributes} FROM {$this->table}
             {$this->buildConditions()}
+            {$orderSql}
             LIMIT :limit OFFSET :offset
         SQL;
 
