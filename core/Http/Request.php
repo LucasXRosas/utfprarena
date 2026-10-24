@@ -54,8 +54,59 @@ class Request
         return (isset($_SERVER['HTTP_ACCEPT']) && $_SERVER['HTTP_ACCEPT'] === 'application/json');
     }
 
+    public function hasParam(string $key): bool
+    {
+        if (array_key_exists($key, $this->params)) {
+            return true;
+        }
+
+        if (str_contains($key, '.')) {
+            $segments = explode('.', $key);
+            $current = $this->params;
+            foreach ($segments as $segment) {
+                if (!is_array($current) || !array_key_exists($segment, $current)) {
+                    return false;
+                }
+                $current = $current[$segment];
+            }
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * @param string[] $keys
+     */
+    public function hasParams(array $keys): bool
+    {
+        foreach ($keys as $key) {
+            if (!$this->hasParam($key)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     public function getParam(string $key, mixed $default = null): mixed
     {
-        return $this->params[$key] ?? $default;
+        if (array_key_exists($key, $this->params)) {
+            return $this->params[$key];
+        }
+
+        if (str_contains($key, '.')) {
+            $segments = explode('.', $key);
+            $current = $this->params;
+            foreach ($segments as $segment) {
+                if (!is_array($current) || !array_key_exists($segment, $current)) {
+                    return $default;
+                }
+                $current = $current[$segment];
+            }
+            return $current;
+        }
+
+        return $default;
     }
 }

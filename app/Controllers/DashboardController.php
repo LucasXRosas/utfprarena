@@ -2,10 +2,10 @@
 
 namespace App\Controllers;
 
-use Core\Database\Database;
+use App\Models\Court;
+use App\Models\Invoice;
 use Core\Http\Controllers\Controller;
 use Core\Http\Request;
-use PDO;
 
 class DashboardController extends Controller
 {
@@ -14,19 +14,11 @@ class DashboardController extends Controller
         $user = $this->currentUser();
         $title = 'Área do Aluno - Arena Beach Tennis';
 
-        $pdo = Database::getDatabaseConn();
-
-        // Buscar quadras disponíveis
-        $stmtCourts = $pdo->query("SELECT * FROM courts ORDER BY id ASC");
-        $courts = $stmtCourts ? $stmtCourts->fetchAll(PDO::FETCH_ASSOC) : [];
-
-        // Buscar faturas do usuário logado
-        $invoices = [];
-        if ($user !== null && $user->id !== null) {
-            $stmtInv = $pdo->prepare("SELECT * FROM invoices WHERE user_id = :uid ORDER BY due_date DESC");
-            $stmtInv->execute([':uid' => $user->id]);
-            $invoices = $stmtInv->fetchAll(PDO::FETCH_ASSOC);
-        }
+        // Buscar dados utilizando a camada de Model (MVC)
+        $courts = Court::all();
+        $invoices = ($user !== null && $user->id !== null)
+            ? Invoice::allByUser($user->id)
+            : [];
 
         $this->render('dashboard/index', compact('title', 'user', 'courts', 'invoices'));
     }

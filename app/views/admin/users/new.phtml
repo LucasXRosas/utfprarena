@@ -1,0 +1,126 @@
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+            <div>
+                <h1 class="h3 fw-bold text-dark mb-0">Cadastrar Novo Atleta</h1>
+                <small class="text-secondary">Preencha as informações para registrar um novo atleta ou gestor na arena</small>
+            </div>
+            <a href="/admin/users" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-arrow-left"></i> Voltar à Lista
+            </a>
+        </div>
+
+        <div class="card border-0 shadow-sm rounded-3">
+            <div class="card-header bg-dark text-white fw-semibold py-3">
+                <i class="bi bi-person-plus"></i> Formulário de Registro de Usuário
+            </div>
+            <div class="card-body p-4 bg-white">
+                <form action="/admin/users" method="POST" id="new_user_form">
+                    <div class="row g-3">
+                        <!-- Nome -->
+                        <div class="col-md-6">
+                            <label for="user_name" class="form-label fw-semibold">Nome Completo <span class="text-danger">*</span></label>
+                            <input 
+                                type="text" 
+                                class="form-control" 
+                                id="user_name" 
+                                name="user[name]" 
+                                placeholder="Ex: Roberto Silva" 
+                                required 
+                                autofocus
+                            >
+                        </div>
+
+                        <!-- E-mail -->
+                        <div class="col-md-6">
+                            <label for="user_email" class="form-label fw-semibold">E-mail <span class="text-danger">*</span></label>
+                            <input 
+                                type="email" 
+                                class="form-control" 
+                                id="user_email" 
+                                name="user[email]" 
+                                placeholder="roberto@arena.com" 
+                                required
+                            >
+                        </div>
+
+                        <!-- Telefone -->
+                        <div class="col-md-6">
+                            <label for="user_phone" class="form-label fw-semibold">Telefone / WhatsApp</label>
+                            <input 
+                                type="text" 
+                                class="form-control" 
+                                id="user_phone" 
+                                name="user[phone]" 
+                                placeholder="(41) 99999-0000"
+                            >
+                        </div>
+
+                        <!-- CPF -->
+                        <div class="col-md-6">
+                            <label for="user_cpf" class="form-label fw-semibold">CPF</label>
+                            <input 
+                                type="text" 
+                                class="form-control" 
+                                id="user_cpf" 
+                                name="user[cpf]" 
+                                placeholder="000.000.000-00"
+                            >
+                        </div>
+
+                        <!-- Papel (Role) -->
+                        <div class="col-md-6">
+                            <label for="user_role" class="form-label fw-semibold">Perfil de Acesso (Role) <span class="text-danger">*</span></label>
+                            <select class="form-select" id="user_role" name="user[role]">
+                                <option value="student" selected>Aluno / Atleta (Beach Tennis)</option>
+                                <option value="manager">Administrador / Gestor</option>
+                            </select>
+                        </div>
+
+                        <!-- Status Catraca -->
+                        <div class="col-md-6">
+                            <label for="user_status" class="form-label fw-semibold">Status de Entrada (Catraca) <span class="text-danger">*</span></label>
+                            <select class="form-select" id="user_status" name="user[status]">
+                                <option value="active" selected>Ativo (Acesso Liberado)</option>
+                                <option value="blocked">Bloqueado (Inadimplência / Pendência)</option>
+                            </select>
+                        </div>
+
+                        <!-- Senha -->
+                        <div class="col-md-6">
+                            <label for="user_password" class="form-label fw-semibold">Senha de Acesso <span class="text-danger">*</span></label>
+                            <input 
+                                type="password" 
+                                class="form-control" 
+                                id="user_password" 
+                                name="user[password]" 
+                                placeholder="Mínimo 6 caracteres" 
+                                required
+                            >
+                        </div>
+
+                        <!-- Confirmação de Senha -->
+                        <div class="col-md-6">
+                            <label for="user_password_confirmation" class="form-label fw-semibold">Confirmar Senha <span class="text-danger">*</span></label>
+                            <input 
+                                type="password" 
+                                class="form-control" 
+                                id="user_password_confirmation" 
+                                name="user[password_confirmation]" 
+                                placeholder="Repita a senha digitada" 
+                                required
+                            >
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+                        <a href="/admin/users" class="btn btn-outline-secondary">Cancelar</a>
+                        <button type="submit" class="btn btn-success fw-semibold px-4" id="btn_submit_user">
+                            <i class="bi bi-check-circle"></i> Salvar Atleta
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

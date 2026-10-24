@@ -2,8 +2,9 @@
 
 namespace App\Models;
 
-use Lib\Validations;
+use Core\Database\ActiveRecord\HasMany;
 use Core\Database\ActiveRecord\Model;
+use Lib\Validations;
 
 /**
  * @property int $id
@@ -120,6 +121,43 @@ class User extends Model
     public function activate(): void
     {
         $this->status = self::STATUS_ACTIVE;
+    }
+
+    public function changePassword(string $newPassword): void
+    {
+        $this->encrypted_password = password_hash($newPassword, PASSWORD_DEFAULT);
+    }
+
+    public function invoices(): HasMany
+    {
+        return $this->hasMany(Invoice::class, 'user_id');
+    }
+
+    /**
+     * @return array<Invoice>
+     */
+    public function getInvoices(): array
+    {
+        if ($this->id === null) {
+            return [];
+        }
+
+        return Invoice::allByUser($this->id);
+    }
+
+    public static function countTotal(): int
+    {
+        return count(self::all());
+    }
+
+    public static function countActive(): int
+    {
+        return count(self::where(['status' => self::STATUS_ACTIVE]));
+    }
+
+    public static function countBlocked(): int
+    {
+        return count(self::where(['status' => self::STATUS_BLOCKED]));
     }
 
     public function __set(string $property, mixed $value): void

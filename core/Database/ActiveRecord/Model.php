@@ -12,8 +12,9 @@ use ReflectionMethod;
  * Class Model
  * @package Core\Database\ActiveRecord
  * @property int $id
+ * @implements \ArrayAccess<string, mixed>
  */
-abstract class Model
+abstract class Model implements \ArrayAccess
 {
     /** @var array<string, string> */
     protected array $errors = [];
@@ -86,6 +87,31 @@ abstract class Model
         throw new \Exception("Property {$property} not found in " . static::class);
     }
 
+    /* ------------------- ARRAY ACCESS METHODS ------------------- */
+    public function offsetExists(mixed $offset): bool
+    {
+        $offset = (string) $offset;
+        return property_exists($this, $offset) || array_key_exists($offset, $this->attributes);
+    }
+
+    public function offsetGet(mixed $offset): mixed
+    {
+        return $this->__get((string) $offset);
+    }
+
+    public function offsetSet(mixed $offset, mixed $value): void
+    {
+        $this->__set((string) $offset, $value);
+    }
+
+    public function offsetUnset(mixed $offset): void
+    {
+        $offset = (string) $offset;
+        if (array_key_exists($offset, $this->attributes)) {
+            $this->attributes[$offset] = null;
+        }
+    }
+
     public static function table(): string
     {
         return static::$table;
@@ -131,6 +157,23 @@ abstract class Model
     public function addError(string $index, string $value): void
     {
         $this->errors[$index] = $value;
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public function getErrors(): array
+    {
+        return $this->errors;
+    }
+
+    public function firstError(): ?string
+    {
+        if (empty($this->errors)) {
+            return null;
+        }
+
+        return reset($this->errors);
     }
 
     public function validates(): void {}
@@ -281,15 +324,20 @@ abstract class Model
         return $models;
     }
 
-    public static function paginate(int $page = 1, int $per_page = 10, string $route = null): Paginator
-    {
+    public static function paginate(
+        int $page = 1,
+        int $per_page = 10,
+        string $route = null,
+        ?string $order = null
+    ): Paginator {
         return new Paginator(
             class: static::class,
             page: $page,
             per_page: $per_page,
             table: static::$table,
             attributes: static::$columns,
-            route: $route
+            route: $route,
+            order: $order
         );
     }
 

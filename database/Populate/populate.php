@@ -46,6 +46,55 @@ $bloqueado = new User([
 ]);
 $bloqueado->save();
 
+// 4. Outros atletas para teste de paginação e gestão
+$aluno3 = new User([
+    'name' => 'Beatriz Lima',
+    'email' => 'beatriz@arena.com',
+    'password' => 'aluno123',
+    'password_confirmation' => 'aluno123',
+    'role' => User::ROLE_STUDENT,
+    'status' => User::STATUS_ACTIVE,
+    'phone' => '(41) 96666-0004',
+    'cpf' => '333.333.333-04'
+]);
+$aluno3->save();
+
+$aluno4 = new User([
+    'name' => 'Carlos Eduardo',
+    'email' => 'carlos@arena.com',
+    'password' => 'aluno123',
+    'password_confirmation' => 'aluno123',
+    'role' => User::ROLE_STUDENT,
+    'status' => User::STATUS_ACTIVE,
+    'phone' => '(41) 95555-0005',
+    'cpf' => '444.444.444-05'
+]);
+$aluno4->save();
+
+$aluno5 = new User([
+    'name' => 'Daniela Souza',
+    'email' => 'daniela@arena.com',
+    'password' => 'aluno123',
+    'password_confirmation' => 'aluno123',
+    'role' => User::ROLE_STUDENT,
+    'status' => User::STATUS_BLOCKED,
+    'phone' => '(41) 94444-0006',
+    'cpf' => '555.555.555-06'
+]);
+$aluno5->save();
+
+$aluno6 = new User([
+    'name' => 'Eduardo Mendes',
+    'email' => 'eduardo@arena.com',
+    'password' => 'aluno123',
+    'password_confirmation' => 'aluno123',
+    'role' => User::ROLE_STUDENT,
+    'status' => User::STATUS_ACTIVE,
+    'phone' => '(41) 93333-0007',
+    'cpf' => '666.666.666-07'
+]);
+$aluno6->save();
+
 // 4. Inserir Quadras da Arena de Beach Tennis
 $pdo = Database::getDatabaseConn();
 $pdo->exec("INSERT INTO courts (name, type, status) VALUES 
