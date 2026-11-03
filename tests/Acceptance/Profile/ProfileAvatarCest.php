@@ -67,6 +67,7 @@ class ProfileAvatarCest
             '/assets/images/defaults/avatar.png',
             $page->grabAttributeFrom('#profile_avatar', 'src')
         );
+        clearstatcache(true, $path); // o arquivo é apagado por outro processo (PHP-FPM)
         Assert::assertFileDoesNotExist($path);
     }
 

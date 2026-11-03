@@ -74,6 +74,17 @@ class CourtGalleryCest
         return codecept_root_dir() . 'public' . (string) parse_url($src, PHP_URL_PATH);
     }
 
+    /**
+     * O PHP guarda em cache o resultado de is_file()/is_dir() (stat cache) dentro do processo do teste.
+     * Como quem apaga o arquivo é outro processo (o PHP-FPM do servidor), o cache precisa ser limpo
+     * antes de verificar que o arquivo/pasta não existe mais.
+     */
+    private function assertRemovedFromFilesystem(string $path): void
+    {
+        clearstatcache(true, $path);
+        Assert::assertFileDoesNotExist($path);
+    }
+
     // 1.1 Upload de imagem
     public function uploadDeImagem(AcceptanceTester $page): void
     {
@@ -104,7 +115,13 @@ class CourtGalleryCest
 
         $this->loginAsStudent($page);
         $page->seeElement('#btn_view_gallery_1');
-        $page->click('#btn_view_gallery_1');
+        $page->see('Ver galeria (1 fotos)', '#btn_view_gallery_1');
+
+        // O card fica no rodapé da página, fora da área clicável do Chrome headless:
+        // em vez do clique, seguimos o link do próprio botão (garantindo que ele aponta para a galeria certa)
+        $href = $page->grabAttributeFrom('#btn_view_gallery_1', 'href');
+        Assert::assertStringEndsWith('/courts/1', $href);
+        $page->amOnPage((string) parse_url($href, PHP_URL_PATH));
 
         $page->seeInCurrentUrl('/courts/1');
         $page->see('Galeria: Quadra Central');
@@ -130,7 +147,7 @@ class CourtGalleryCest
 
         $page->see('removida com sucesso! Arquivo apagado do filesystem');
         $page->see('Nenhuma foto cadastrada nesta galeria ainda.');
-        Assert::assertFileDoesNotExist($path);
+        $this->assertRemovedFromFilesystem($path);
     }
 
     // Validação: tamanho máximo de 2MB
@@ -179,6 +196,7 @@ class CourtGalleryCest
 
         $page->see('removida com sucesso! 2 imagem(ns) apagada(s) do banco (ON DELETE CASCADE) e do filesystem.');
         $page->dontSee('Quadra Cascata Teste', '#table_courts');
+        clearstatcache(true, $directory);
         Assert::assertDirectoryDoesNotExist($directory);
     }
 }
