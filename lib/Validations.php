@@ -26,6 +26,26 @@ class Validations
         return true;
     }
 
+    /**
+     * Integridade referencial na camada da aplicação: verifica se o registro
+     * apontado pela chave estrangeira existe na tabela relacionada.
+     * Ex: Validations::foreignKeyExists('court_id', $image, Court::class)
+     */
+    public static function foreignKeyExists($attribute, $obj, $relatedClass)
+    {
+        $value = $obj->$attribute;
+        if ($value === null || $value === '') {
+            return true; // a obrigatoriedade é responsabilidade do notEmpty
+        }
+
+        if (!$relatedClass::exists(['id' => $value])) {
+            $obj->addError($attribute, 'registro relacionado inexistente!');
+            return false;
+        }
+
+        return true;
+    }
+
     public static function uniqueness($fields, $object)
     {
         $dbFieldsValues = [];

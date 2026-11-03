@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\ProfileAvatar;
 use Core\Database\ActiveRecord\HasMany;
 use Core\Database\ActiveRecord\Model;
 use Lib\Validations;
@@ -143,6 +144,30 @@ class User extends Model
         }
 
         return Invoice::allByUser($this->id);
+    }
+
+    /**
+     * Foto de perfil do usuário (arquivo em uploads/users/{id}, nome em users.avatar_name).
+     */
+    public function avatar(): ProfileAvatar
+    {
+        return new ProfileAvatar($this);
+    }
+
+    /**
+     * Ao excluir o usuário, apaga também sua pasta de uploads (avatar) do filesystem.
+     * As faturas são removidas pelo ON DELETE CASCADE de invoices.user_id.
+     */
+    public function destroy(): bool
+    {
+        $avatar = $this->avatar();
+        $deleted = parent::destroy();
+
+        if ($deleted) {
+            $avatar->removeAll();
+        }
+
+        return $deleted;
     }
 
     public static function countTotal(): int

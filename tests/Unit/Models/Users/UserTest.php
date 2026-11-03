@@ -181,6 +181,16 @@ class UserTest extends TestCase
         $this->assertEquals(1, User::countBlocked());
     }
 
+    public function test_user_avatar_returns_profile_avatar_with_default_image(): void
+    {
+        $avatar = $this->user->avatar();
+
+        $this->assertInstanceOf(\App\Services\ProfileAvatar::class, $avatar);
+        $this->assertFalse($avatar->hasAvatar());
+        $this->assertEquals(\App\Services\ProfileAvatar::DEFAULT_AVATAR, $avatar->path());
+        $this->assertEquals('users/' . $this->user->id, $avatar->directory());
+    }
+
     public function test_user_invoices_relationship(): void
     {
         $invoices = $this->user->invoices();

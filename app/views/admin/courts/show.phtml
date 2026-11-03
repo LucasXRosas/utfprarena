@@ -1,0 +1,96 @@
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4 pb-3 border-bottom">
+    <div>
+        <h1 class="h3 fw-bold text-dark mb-1">Galeria: <?= htmlspecialchars($court->name) ?></h1>
+        <small class="text-secondary">
+            Quadra #<?= $court->id ?> &bull; <?= count($images) ?> foto(s) &bull;
+            Pasta: <code>public<?= htmlspecialchars(\Core\Constants\Constants::uploadsUrl()) ?>/<?= htmlspecialchars($gallery->directory()) ?>/</code>
+        </small>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="/courts/<?= $court->id ?>" class="btn btn-outline-info btn-sm">
+            <i class="bi bi-eye"></i> Ver como Aluno
+        </a>
+        <a href="/admin/courts" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left"></i> Voltar às Quadras
+        </a>
+    </div>
+</div>
+
+<!-- Formulário de upload -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-dark text-white fw-semibold">
+        <i class="bi bi-cloud-arrow-up"></i> Enviar Nova Foto para a Galeria
+    </div>
+    <div class="card-body">
+        <!-- enctype multipart/form-data: o corpo da requisição é dividido em partes, uma delas com o binário da imagem -->
+        <form action="/admin/courts/<?= $court->id ?>/images" method="POST" enctype="multipart/form-data" id="court_image_form">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-5">
+                    <label for="court_image_file" class="form-label fw-semibold">Arquivo de imagem <span class="text-danger">*</span></label>
+                    <input type="file" class="form-control" id="court_image_file" name="image"
+                           accept="<?= htmlspecialchars($validator->acceptAttribute()) ?>" required>
+                </div>
+                <div class="col-md-5">
+                    <label for="court_image_caption" class="form-label fw-semibold">Legenda (opcional)</label>
+                    <input type="text" class="form-control" id="court_image_caption" name="caption" maxlength="255"
+                           placeholder="Ex: Vista lateral da quadra">
+                </div>
+                <div class="col-md-2 d-grid">
+                    <button type="submit" class="btn btn-warning fw-semibold" id="btn_upload_image">
+                        <i class="bi bi-upload"></i> Enviar
+                    </button>
+                </div>
+            </div>
+            <div class="form-text mt-2">
+                Formatos aceitos: <strong><?= $validator->allowedLabel() ?></strong> &bull;
+                Tamanho máximo: <strong><?= $validator->maxSizeLabel() ?></strong> &bull;
+                O tipo real do arquivo é conferido pelo conteúdo; arquivos executáveis ou com código embutido são bloqueados.
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Galeria -->
+<?php if (empty($images)) : ?>
+    <div class="text-center text-muted py-5 bg-white rounded shadow-sm" id="empty_gallery">
+        <i class="bi bi-images fs-1 d-block mb-2"></i>
+        Nenhuma foto cadastrada nesta galeria ainda.
+    </div>
+<?php else : ?>
+    <div class="row g-4" id="court_gallery">
+        <?php foreach ($images as $image) : ?>
+            <div class="col-sm-6 col-lg-4" id="court_image_<?= $image->id ?>">
+                <div class="card border-0 shadow-sm h-100">
+                    <a href="<?= htmlspecialchars($image->url()) ?>" target="_blank" rel="noopener">
+                        <img src="<?= htmlspecialchars($image->url()) ?>" class="card-img-top gallery-thumb"
+                             alt="<?= htmlspecialchars($image->caption ?? $image->original_name) ?>">
+                    </a>
+                    <div class="card-body small">
+                        <p class="fw-semibold mb-1"><?= htmlspecialchars($image->caption ?? 'Sem legenda') ?></p>
+                        <ul class="list-unstyled text-muted mb-2">
+                            <li><i class="bi bi-file-earmark-image"></i> Original: <?= htmlspecialchars($image->original_name) ?></li>
+                            <li><i class="bi bi-filetype-raw"></i> MIME: <code><?= htmlspecialchars($image->mime_type) ?></code></li>
+                            <li><i class="bi bi-hdd"></i> Tamanho: <?= $image->sizeLabel() ?></li>
+                            <li>
+                                <i class="bi bi-folder2-open"></i> Filesystem:
+                                <?php if ($gallery->fileExists($image)) : ?>
+                                    <span class="badge bg-success">arquivo presente</span>
+                                <?php else : ?>
+                                    <span class="badge bg-danger">arquivo ausente</span>
+                                <?php endif; ?>
+                            </li>
+                        </ul>
+                        <code class="d-block text-break small mb-2">public<?= htmlspecialchars($image->url()) ?></code>
+                        <form action="/admin/courts/<?= $court->id ?>/images/<?= $image->id ?>" method="POST" class="m-0"
+                              onsubmit="return confirm('Remover esta imagem da galeria?');">
+                            <input type="hidden" name="_method" value="DELETE">
+                            <button type="submit" class="btn btn-outline-danger btn-sm w-100" id="btn_delete_image_<?= $image->id ?>">
+                                <i class="bi bi-trash"></i> Remover Imagem
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        <?php endforeach; ?>
+    </div>
+<?php endif; ?>

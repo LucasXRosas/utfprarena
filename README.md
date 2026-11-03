@@ -19,8 +19,16 @@ O **UTFPR Arena** é um sistema de gerenciamento de arenas esportivas de *Beach 
 | Tipo de Usuário | Papel (`role`) | Área Exclusiva | Permissões e Ações Permitidas |
 |---|---|---|---|
 | **Visitante** | Não autenticado | `/` e `/login` | Visualizar página inicial pública e efetuar login. Bloqueado de qualquer área restrita. |
-| **Aluno (Atleta)** | `student` | `/dashboard` | Visualizar credencial de acesso ("Apto para Jogar"), histórico de mensalidades e quadras disponíveis da arena. |
-| **Administrador (Gestor)** | `manager` | `/admin` | Acesso ao Painel Gerencial, métricas de faturamento e atletas, e controle manual de status (bloquear / ativar atleta). |
+| **Aluno (Atleta)** | `student` | `/dashboard`, `/profile`, `/courts/{id}` | Visualizar credencial de acesso ("Apto para Jogar"), histórico de mensalidades, quadras disponíveis e suas galerias de fotos; enviar/remover a própria foto de perfil. |
+| **Administrador (Gestor)** | `manager` | `/admin`, `/admin/courts` | Acesso ao Painel Gerencial, métricas de faturamento e atletas, controle manual de status (bloquear / ativar atleta) e gestão das quadras com upload/remoção de fotos da galeria. |
+
+### 1.3 Imagens e Arquivos (Relação 1xN)
+| Funcionalidade | Rotas | Armazenamento |
+|---|---|---|
+| **Galeria de fotos das quadras** (uma quadra possui N imagens) | `GET /admin/courts/{id}`, `POST /admin/courts/{court_id}/images`, `DELETE /admin/courts/{court_id}/images/{id}`, `GET /courts/{id}` | Arquivo em `public/assets/uploads/courts/{court_id}/`; metadados na tabela `court_images` (FK `court_id` com `ON DELETE CASCADE`) |
+| **Foto de perfil (avatar)** | `GET /profile`, `POST /profile/avatar`, `DELETE /profile/avatar` | Arquivo em `public/assets/uploads/users/{user_id}/`; nome na coluna `users.avatar_name` |
+
+Validações de upload (`app/Services/ImageValidator.php`): apenas **JPG/JPEG, PNG e WEBP**, até **2MB**, MIME type real verificado pelo conteúdo, bloqueio de extensões executáveis (ex: `foto.php.jpg`) e de imagens com código embutido.
 
 ---
 
@@ -63,7 +71,7 @@ Para checar se todos os contêineres subiram com sucesso:
 ```
 
 ### Passo 5: Criar o Banco de Dados e as Tabelas
-Execute o reset do schema MySQL para criar as tabelas `users`, `courts` e `invoices`:
+Execute o reset do schema MySQL para criar as tabelas `users`, `courts`, `invoices` e `court_images`:
 ```bash
 ./run db:reset
 ```
@@ -74,7 +82,7 @@ Execute o script de população para semear os perfis da demonstração (Admin, 
 ./run db:populate
 ```
 
-### Passo 7: Configurar Permissões de Uploads (Opcional)
+### Passo 7: Configurar Permissões de Uploads (necessário no Linux para o upload de imagens)
 ```bash
 sudo chown -R www-data:www-data public/assets/uploads
 ```

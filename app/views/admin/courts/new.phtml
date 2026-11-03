@@ -1,0 +1,35 @@
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+            <div>
+                <h1 class="h3 fw-bold text-dark mb-0">Cadastrar Quadra</h1>
+                <small class="text-secondary">Após o cadastro você poderá enviar as fotos da galeria</small>
+            </div>
+            <a href="/admin/courts" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-arrow-left"></i> Voltar
+            </a>
+        </div>
+
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+                <form action="/admin/courts" method="POST" id="new_court_form">
+                    <div class="mb-3">
+                        <label for="court_name" class="form-label fw-semibold">Nome da Quadra <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="court_name" name="court[name]"
+                               placeholder="Ex: Quadra 04 (Areia Fina)" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="court_status" class="form-label fw-semibold">Status</label>
+                        <select class="form-select" id="court_status" name="court[status]">
+                            <option value="available">Disponível</option>
+                            <option value="maintenance">Em manutenção</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary" id="btn_submit_court">
+                        <i class="bi bi-check2-circle"></i> Cadastrar Quadra
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

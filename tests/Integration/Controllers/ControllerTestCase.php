@@ -42,10 +42,11 @@ abstract class ControllerTestCase extends TestCase
 
     /**
      * @param array<string, mixed> $params
+     * @param array<string, array<string, mixed>> $files simula $_FILES (uploads multipart/form-data)
      */
-    public function post(string $action, string $controllerName, array $params = []): string
+    public function post(string $action, string $controllerName, array $params = [], array $files = []): string
     {
-        return $this->execController($action, $controllerName, $params);
+        return $this->execController($action, $controllerName, $params, $files);
     }
 
     /**
@@ -58,11 +59,13 @@ abstract class ControllerTestCase extends TestCase
 
     /**
      * @param array<string, mixed> $params
+     * @param array<string, array<string, mixed>> $files
      */
-    private function execController(string $action, string $controllerName, array $params = []): string
+    private function execController(string $action, string $controllerName, array $params = [], array $files = []): string
     {
         $controller = $this->getControllerInstance($controllerName);
         $this->request->addParams($params);
+        $this->request->addFiles($files);
 
         ob_start();
         try {

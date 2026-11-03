@@ -1,0 +1,82 @@
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4 pb-3 border-bottom">
+    <div>
+        <h1 class="h3 fw-bold text-dark mb-1">Quadras e Galerias de Fotos</h1>
+        <small class="text-secondary">Cada quadra possui uma galeria com N imagens (relação 1xN)</small>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="/admin/courts/new" class="btn btn-primary btn-sm" id="btn_new_court">
+            <i class="bi bi-plus-circle"></i> Nova Quadra
+        </a>
+        <a href="/admin" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left"></i> Painel Gerencial
+        </a>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" id="table_courts">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-3" style="width: 70px;">ID</th>
+                        <th style="width: 110px;">Capa</th>
+                        <th>Quadra</th>
+                        <th>Status</th>
+                        <th>Fotos na Galeria</th>
+                        <th class="text-end pe-3">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if (empty($courts)) : ?>
+                        <tr>
+                            <td colspan="6" class="text-center py-4 text-muted">Nenhuma quadra cadastrada.</td>
+                        </tr>
+                    <?php endif; ?>
+
+                    <?php foreach ($courts as $court) : ?>
+                        <?php $cover = $court->coverImage(); ?>
+                        <tr id="court_row_<?= $court->id ?>">
+                            <td class="ps-3 fw-bold text-muted">#<?= $court->id ?></td>
+                            <td>
+                                <?php if ($cover !== null) : ?>
+                                    <img src="<?= htmlspecialchars($cover->url()) ?>" alt="Capa" class="court-cover-sm rounded">
+                                <?php else : ?>
+                                    <div class="court-cover-sm rounded bg-light border d-flex align-items-center justify-content-center text-muted">
+                                        <i class="bi bi-image"></i>
+                                    </div>
+                                <?php endif; ?>
+                            </td>
+                            <td class="fw-semibold"><?= htmlspecialchars($court->name) ?></td>
+                            <td>
+                                <span class="badge <?= $court->isAvailable() ? 'bg-success' : 'bg-warning text-dark' ?>">
+                                    <?= $court->isAvailable() ? 'DISPONÍVEL' : 'MANUTENÇÃO' ?>
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge bg-light text-dark border" id="court_images_count_<?= $court->id ?>">
+                                    <i class="bi bi-images"></i> <?= $court->imagesCount() ?> foto(s)
+                                </span>
+                            </td>
+                            <td class="text-end pe-3">
+                                <div class="d-inline-flex gap-1">
+                                    <a href="/admin/courts/<?= $court->id ?>" class="btn btn-outline-primary btn-sm"
+                                       id="btn_gallery_court_<?= $court->id ?>">
+                                        <i class="bi bi-images"></i> Galeria
+                                    </a>
+                                    <form action="/admin/courts/<?= $court->id ?>" method="POST" class="d-inline m-0"
+                                          onsubmit="return confirm('Excluir a quadra e TODAS as fotos da galeria?');">
+                                        <input type="hidden" name="_method" value="DELETE">
+                                        <button type="submit" class="btn btn-outline-danger btn-sm" id="btn_delete_court_<?= $court->id ?>">
+                                            <i class="bi bi-trash"></i> Excluir
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

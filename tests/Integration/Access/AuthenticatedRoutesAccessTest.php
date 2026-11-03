@@ -39,6 +39,74 @@ class AuthenticatedRoutesAccessTest extends TestCase
         $this->assertStringContainsString('/login', $location);
     }
 
+    /**
+     * @param array<string, mixed> $options
+     */
+    private function assertRedirectsToLogin(string $method, string $uri, array $options = []): void
+    {
+        $response = $this->client->request($method, $uri, $options);
+
+        $this->assertEquals(302, $response->getStatusCode(), "{$method} {$uri} deveria redirecionar");
+        $this->assertStringContainsString('/login', $response->getHeaderLine('Location'));
+    }
+
+    /* ---------------- Rotas de imagens/arquivos ---------------- */
+
+    public function test_should_redirect_unauthenticated_user_from_profile(): void
+    {
+        $this->assertRedirectsToLogin('GET', '/profile');
+    }
+
+    public function test_should_block_unauthenticated_avatar_upload(): void
+    {
+        $this->assertRedirectsToLogin('POST', '/profile/avatar', [
+            'multipart' => [
+                ['name' => 'avatar', 'contents' => 'conteudo', 'filename' => 'avatar.png'],
+            ],
+        ]);
+    }
+
+    public function test_should_block_unauthenticated_avatar_removal(): void
+    {
+        $this->assertRedirectsToLogin('POST', '/profile/avatar', [
+            'form_params' => ['_method' => 'DELETE'],
+        ]);
+    }
+
+    public function test_should_redirect_unauthenticated_user_from_court_gallery(): void
+    {
+        $this->assertRedirectsToLogin('GET', '/courts/1');
+    }
+
+    public function test_should_redirect_unauthenticated_user_from_admin_courts(): void
+    {
+        $this->assertRedirectsToLogin('GET', '/admin/courts');
+        $this->assertRedirectsToLogin('GET', '/admin/courts/1');
+    }
+
+    public function test_should_block_unauthenticated_court_image_upload(): void
+    {
+        $this->assertRedirectsToLogin('POST', '/admin/courts/1/images', [
+            'multipart' => [
+                ['name' => 'image', 'contents' => 'conteudo', 'filename' => 'quadra.png'],
+            ],
+        ]);
+    }
+
+    public function test_should_block_unauthenticated_court_image_removal(): void
+    {
+        $this->assertRedirectsToLogin('POST', '/admin/courts/1/images/1', [
+            'form_params' => ['_method' => 'DELETE'],
+        ]);
+    }
+
+    public function test_should_block_unauthenticated_court_removal(): void
+    {
+        $this->assertRedirectsToLogin('POST', '/admin/courts/1', [
+            'form_params' => ['_method' => 'DELETE'],
+        ]);
+    }
+
     public function test_should_return_401_for_unauthenticated_json_request(): void
     {
         $response = $this->client->get('/dashboard', [
