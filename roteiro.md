@@ -782,3 +782,68 @@ WHERE CONSTRAINT_SCHEMA = DATABASE();
 - **"Por que validar a FK na aplicação se o banco já valida?"** Para dar uma mensagem amigável ("Galeria inexistente") em vez de uma exceção SQL, e para não gravar o arquivo no disco à toa. O banco continua sendo a última linha de defesa.
 - **"Como vocês testam upload se `move_uploaded_file` só funciona com HTTP?"** Nos unitários, o `TestFileStorage` substitui só esse método. Nos testes de aceitação, o upload é real, feito pelo navegador via Selenium.
 - **"Por que o nome do arquivo é aleatório?"** Evita colisão, sobrescrita, *path traversal* e enumeração de arquivos, e impede que caracteres do nome original causem problemas.
+
+---
+
+## Referências
+
+Referências bibliográficas usadas na explicação dos conceitos (Seção 5) e do framework (Seção 6), em formato ABNT, com os capítulos consultados.
+
+### Livros
+
+1. **ELMASRI, Ramez; NAVATHE, Shamkant B.** *Sistemas de Banco de Dados*. 7. ed. São Paulo: Pearson Education do Brasil, 2018.
+   - **Cap. 5:** O Modelo de Dados Relacional e as Restrições em Bancos de Dados Relacionais. Seções sobre chave primária, **chave estrangeira** e **restrição de integridade referencial**.
+   - **Cap. 6:** SQL Básica. Seção "Especificando restrições de chave e de integridade referencial", com as ações referenciais `ON DELETE`/`ON UPDATE`: `CASCADE`, `SET NULL`, `SET DEFAULT` e `RESTRICT`/`NO ACTION`.
+   - *Usado em:* 5.1 Chave Estrangeira e 5.3 Cascade Delete, SET NULL e RESTRICT.
+
+2. **SILBERSCHATZ, Abraham; KORTH, Henry F.; SUDARSHAN, S.** *Sistema de Banco de Dados*. 7. ed. Rio de Janeiro: GEN LTC, 2020.
+   - **Cap. 4:** SQL Intermediária. Seção "Restrições de integridade", subseção "Integridade referencial" (definição e ações em cascata).
+   - *Usado em:* 5.2 Integridade Referencial.
+
+3. **DATE, C. J.** *Introdução a Sistemas de Bancos de Dados*. 8. ed. Rio de Janeiro: Elsevier/Campus, 2004.
+   - **Cap. 9:** Integridade. Restrições de integridade, chaves candidatas e **chaves estrangeiras**, e regras referenciais.
+   - *Usado em:* 5.2 Integridade Referencial (complementar).
+
+4. **GOURLEY, David; TOTTY, Brian et al.** *HTTP: The Definitive Guide*. Sebastopol: O'Reilly Media, 2002.
+   - **Cap. 3:** HTTP Messages. Estrutura das mensagens, cabeçalhos e o cabeçalho `Content-Type`.
+   - **Cap. 15:** Entities and Encodings. **Media types (MIME types)**, `Content-Type`, `Content-Length` e **multipart form submissions** (`multipart/form-data` e *boundary*).
+   - *Usado em:* 5.4 multipart/form-data e 5.5 MIME Type.
+
+5. **WELLING, Luke; THOMSON, Laura.** *PHP and MySQL Web Development*. 5. ed. Boston: Addison-Wesley, 2016.
+   - **Cap. 17:** Interacting with the File System and the Server. Seção "Uploading Files": formulário com `enctype="multipart/form-data"`, superglobal `$_FILES`, `move_uploaded_file()` e cuidados de segurança.
+   - *Usado em:* 5.4 multipart/form-data (implementação em PHP) e 6.1 Fluxo de registro da imagem.
+
+6. **FOWLER, Martin.** *Padrões de Arquitetura de Aplicações Corporativas*. Porto Alegre: Bookman, 2006.
+   - **Cap. 10:** Padrões de Arquitetura de Fontes de Dados. Padrão **Active Record**, base dos models do framework (`Core\Database\ActiveRecord\Model`).
+   - **Cap. 12:** Padrões Estruturais Objeto-Relacionais. Padrão **Foreign Key Mapping** (mapeamento de chave estrangeira), base das classes `BelongsTo` e `HasMany`.
+   - *Usado em:* 6.3 Explicação do Funcionamento do Framework.
+
+### Normas técnicas (IETF)
+
+7. **FREED, N.; BORENSTEIN, N.** *RFC 2045: Multipurpose Internet Mail Extensions (MIME) Part One: Format of Internet Message Bodies*. IETF, 1996. Disponível em: https://www.rfc-editor.org/rfc/rfc2045.
+   - Define o cabeçalho `Content-Type` e o formato `tipo/subtipo`. *Usado em:* 5.5 MIME Type.
+
+8. **FREED, N.; BORENSTEIN, N.** *RFC 2046: Multipurpose Internet Mail Extensions (MIME) Part Two: Media Types*. IETF, 1996. Disponível em: https://www.rfc-editor.org/rfc/rfc2046.
+   - Define os tipos de mídia (`image`, `text`, `application`…) e o tipo **multipart** com *boundary*. *Usado em:* 5.4 e 5.5.
+
+9. **MASINTER, L.** *RFC 7578: Returning Values from Forms: multipart/form-data*. IETF, 2015. Disponível em: https://www.rfc-editor.org/rfc/rfc7578.
+   - Especificação atual do `multipart/form-data` (partes, `Content-Disposition`, `filename`). *Usado em:* 5.4 multipart/form-data.
+
+### Segurança
+
+10. **OWASP FOUNDATION.** *File Upload Cheat Sheet*. OWASP Cheat Sheet Series. Disponível em: https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html.
+    - Validação de extensão e de tipo de conteúdo, renomeação de arquivos, limite de tamanho e armazenamento fora da área executável. *Usado em:* 2.2 Tratamento de upload malicioso e 5.5 MIME Type.
+
+11. **OWASP FOUNDATION.** *Unrestricted File Upload*. OWASP Community. Disponível em: https://owasp.org/www-community/vulnerabilities/Unrestricted_File_Upload.
+    - Riscos de upload sem restrição (execução de scripts, dupla extensão, falsificação de `Content-Type`). *Usado em:* 2.2 Tratamento de upload malicioso.
+
+### Mapa rápido: conceito → referência
+
+| Conceito (rubrica) | Referência principal | Complementar |
+|---|---|---|
+| Chave Estrangeira (FK) | Elmasri; Navathe (2018), Cap. 5 | Date (2004), Cap. 9 |
+| Integridade Referencial | Silberschatz; Korth; Sudarshan (2020), Cap. 4 | Date (2004), Cap. 9; Elmasri; Navathe (2018), Cap. 5 |
+| Cascade Delete, SET NULL e RESTRICT | Elmasri; Navathe (2018), Cap. 6 | Silberschatz et al. (2020), Cap. 4 |
+| multipart/form-data (enctype) | Gourley; Totty (2002), Cap. 15 | RFC 7578; Welling; Thomson (2016), Cap. 17 |
+| MIME Type | Gourley; Totty (2002), Caps. 3 e 15 | RFC 2045; RFC 2046; OWASP |
+| Active Record, BelongsTo e HasMany | Fowler (2006), Caps. 10 e 12 | — |
