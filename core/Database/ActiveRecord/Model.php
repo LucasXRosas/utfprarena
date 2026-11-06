@@ -390,6 +390,30 @@ abstract class Model implements \ArrayAccess
     }
 
     /**
+     * SELECT COUNT(*) direto no banco, sem carregar os registros na memória.
+     *
+     * @param array<string, mixed> $conditions
+     */
+    public static function count(array $conditions = []): int
+    {
+        $table = static::$table;
+        $sql = "SELECT COUNT(*) FROM {$table}";
+
+        if (!empty($conditions)) {
+            $sqlConditions = array_map(fn($column) => "{$column} = :{$column}", array_keys($conditions));
+            $sql .= ' WHERE ' . implode(' AND ', $sqlConditions);
+        }
+
+        $stmt = Database::getDatabaseConn()->prepare($sql);
+        foreach ($conditions as $column => $value) {
+            $stmt->bindValue($column, $value);
+        }
+        $stmt->execute();
+
+        return (int) $stmt->fetchColumn();
+    }
+
+    /**
      * @param array<string, mixed> $conditions
      */
     public static function exists($conditions): bool

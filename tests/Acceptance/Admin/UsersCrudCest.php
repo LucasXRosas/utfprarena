@@ -42,8 +42,25 @@ class UsersCrudCest
         $page->fillField('user[password_confirmation]', 'senhaDiferente');
         $page->click('#btn_submit_user');
 
-        $page->seeInCurrentUrl('/admin/users/new');
-        $page->see('As senhas devem ser idênticas!');
+        // O formulário é renderizado de novo, mantendo o que foi digitado e com o erro embaixo do campo
+        $page->see('Corrija os campos destacados');
+        $page->see('As senhas devem ser idênticas!', '#error_user_password_confirmation');
+        $page->seeInField('user[name]', 'Novo Atleta Invalido');
+        $page->seeElement('#user_password_confirmation.is-invalid');
+    }
+
+    // 1.1 Campos obrigatórios vazios: cada erro aparece embaixo do seu campo
+    public function cadastroComCamposVaziosMostraErroNoCampo(AcceptanceTester $page): void
+    {
+        $this->loginAsAdmin($page);
+        $page->amOnPage('/admin/users/new');
+        $page->click('#btn_submit_user'); // novalidate: o navegador não bloqueia o envio
+
+        $page->see('Não pode ser vazio!', '#error_user_name');
+        $page->see('Não pode ser vazio!', '#error_user_email');
+        $page->see('Não pode ser vazio!', '#error_user_password');
+        $page->seeElement('#user_name.is-invalid');
+        $page->dontSeeElement('#user_phone.is-invalid');
     }
 
     // 1.2 Tentativa de cadastro bem-sucedida
@@ -78,8 +95,8 @@ class UsersCrudCest
         $page->fillField('user[email]', 'admin@arena.com');
         $page->click('#btn_update_user');
 
-        $page->seeInCurrentUrl('/admin/users/4/edit');
-        $page->see('Erro ao atualizar: já existe um registro com esse dado');
+        $page->see('Já existe um registro com esse dado', '#error_user_email');
+        $page->seeInField('user[email]', 'admin@arena.com');
     }
 
     // 1.4 Tentativa de atualização bem-sucedida

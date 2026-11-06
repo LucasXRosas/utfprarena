@@ -55,7 +55,7 @@ class CourtsController extends Controller
             return;
         }
 
-        FlashMessage::success('Quadra ' . htmlspecialchars($court->name) . ' cadastrada com sucesso! Envie as fotos da galeria.');
+        FlashMessage::success('Quadra ' . $court->name . ' cadastrada com sucesso! Envie as fotos da galeria.');
         $this->redirectTo(route('admin.courts.show', ['id' => $court->id]));
     }
 
@@ -93,7 +93,7 @@ class CourtsController extends Controller
         $court->destroy();
 
         FlashMessage::success(
-            'Quadra ' . htmlspecialchars($name) . ' removida com sucesso! ' . $totalImages
+            'Quadra ' . $name . ' removida com sucesso! ' . $totalImages
             . ' imagem(ns) apagada(s) do banco (ON DELETE CASCADE) e do filesystem.'
         );
         $this->redirectTo(route('admin.courts.index'));

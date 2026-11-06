@@ -23,7 +23,7 @@ class CourtImagesController extends Controller
 
         // Integridade: não é possível registrar imagem em uma galeria inexistente
         if ($court === null) {
-            FlashMessage::danger('Galeria inexistente: a quadra #' . htmlspecialchars((string) $courtId) . ' não existe.');
+            FlashMessage::danger('Galeria inexistente: a quadra #' . (string) $courtId . ' não existe.');
             $this->redirectTo(route('admin.courts.index'));
             return;
         }
@@ -33,13 +33,13 @@ class CourtImagesController extends Controller
         $image = $gallery->add($request->getFile('image'), is_string($caption) ? $caption : null);
 
         if ($image === null) {
-            FlashMessage::danger('Erro ao enviar imagem: ' . htmlspecialchars((string) $gallery->firstError()));
+            FlashMessage::danger('Erro ao enviar imagem: ' . (string) $gallery->firstError());
             $this->redirectTo(route('admin.courts.show', ['id' => $court->id]));
             return;
         }
 
         FlashMessage::success(
-            'Imagem ' . htmlspecialchars($image->original_name) . ' enviada com sucesso! Arquivo salvo em: '
+            'Imagem ' . $image->original_name . ' enviada com sucesso! Arquivo salvo em: '
             . $gallery->url($image)
         );
         $this->redirectTo(route('admin.courts.show', ['id' => $court->id]));
@@ -76,7 +76,7 @@ class CourtImagesController extends Controller
         $gallery->remove($image);
 
         FlashMessage::success(
-            'Imagem ' . htmlspecialchars($image->original_name) . ' removida com sucesso! Arquivo apagado do filesystem: '
+            'Imagem ' . $image->original_name . ' removida com sucesso! Arquivo apagado do filesystem: '
             . $removedPath
         );
         $this->redirectTo(route('admin.courts.show', ['id' => $court->id]));

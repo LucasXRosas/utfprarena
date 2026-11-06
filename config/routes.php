@@ -3,7 +3,6 @@
 use App\Controllers\Admin\CourtImagesController as AdminCourtImagesController;
 use App\Controllers\Admin\CourtsController as AdminCourtsController;
 use App\Controllers\Admin\UsersController as AdminUsersController;
-use App\Controllers\AdminController;
 use App\Controllers\AuthController;
 use App\Controllers\CourtsController;
 use App\Controllers\DashboardController;
@@ -60,9 +59,5 @@ Route::middleware('auth')->group(function () {
             ->name('admin.courts.images.create');
         Route::delete('/admin/courts/{court_id}/images/{id}', [AdminCourtImagesController::class, 'destroy'])
             ->name('admin.courts.images.destroy');
-
-        // Aliases legados para compatibilidade
-        Route::post('/admin/block/{id}', [AdminController::class, 'blockUser'])->name('admin.blockUser');
-        Route::post('/admin/activate/{id}', [AdminController::class, 'activateUser'])->name('admin.activateUser');
     });
 });

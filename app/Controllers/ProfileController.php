@@ -43,7 +43,7 @@ class ProfileController extends Controller
         $avatar = $user->avatar();
 
         if (!$avatar->update($request->getFile('avatar'))) {
-            FlashMessage::danger('Erro ao enviar foto: ' . htmlspecialchars((string) $avatar->firstError()));
+            FlashMessage::danger('Erro ao enviar foto: ' . (string) $avatar->firstError());
             $this->redirectTo(route('profile.show'));
             return;
         }

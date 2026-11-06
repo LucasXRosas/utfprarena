@@ -127,13 +127,13 @@
                                         </a>
 
                                         <!-- Alternar Status (Catraca) -->
-                                        <?php if ($u->isActive()) : ?>
+                                        <?php if ($u->isActive() && $u->id !== $user?->id) : ?>
                                             <form action="/admin/users/<?= $u->id ?>/block" method="POST" class="d-inline m-0">
                                                 <button type="submit" class="btn btn-outline-warning btn-sm" title="Bloquear acesso à arena">
                                                     <i class="bi bi-lock-fill"></i> Bloquear
                                                 </button>
                                             </form>
-                                        <?php else : ?>
+                                        <?php elseif (!$u->isActive()) : ?>
                                             <form action="/admin/users/<?= $u->id ?>/activate" method="POST" class="d-inline m-0">
                                                 <button type="submit" class="btn btn-outline-success btn-sm" title="Reativar acesso à arena">
                                                     <i class="bi bi-unlock-fill"></i> Reativar
