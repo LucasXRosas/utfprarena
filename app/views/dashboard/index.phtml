@@ -21,9 +21,11 @@
             </div>
             <div class="card-body">
                 <div class="text-center mb-3">
-                    <div class="display-4 text-primary"><i class="bi bi-person-circle"></i></div>
+                    <img src="<?= htmlspecialchars($user ? $user->avatar()->path() : \App\Services\ProfileAvatar::DEFAULT_AVATAR) ?>"
+                         alt="Foto do atleta" class="avatar-lg rounded-circle border border-3 border-warning mb-2" id="dashboard_avatar">
                     <h5 class="fw-bold mb-1"><?= htmlspecialchars($user ? $user->name : 'Aluno') ?></h5>
-                    <p class="text-muted small"><?= htmlspecialchars($user ? $user->email : '') ?></p>
+                    <p class="text-muted small mb-1"><?= htmlspecialchars($user ? $user->email : '') ?></p>
+                    <a href="/profile" class="small"><i class="bi bi-camera"></i> Alterar foto de perfil</a>
                 </div>
 
                 <ul class="list-group list-group-flush mb-3">
@@ -114,15 +116,29 @@
     <div class="card-body">
         <div class="row g-3">
             <?php foreach ($courts as $court) : ?>
+                <?php $cover = $court->coverImage(); ?>
                 <div class="col-md-4">
-                    <div class="border rounded-3 p-3 bg-light">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <h6 class="fw-bold mb-0"><?= htmlspecialchars($court['name']) ?></h6>
-                            <span class="badge <?= ($court['status'] === 'available') ? 'bg-success' : 'bg-warning text-dark' ?>">
-                                <?= ($court['status'] === 'available') ? 'DISPONÍVEL' : 'MANUTENÇÃO' ?>
-                            </span>
+                    <div class="border rounded-3 bg-light h-100 overflow-hidden">
+                        <?php if ($cover !== null) : ?>
+                            <img src="<?= htmlspecialchars($cover->url()) ?>" alt="Foto da <?= htmlspecialchars($court['name']) ?>"
+                                 class="w-100 court-cover">
+                        <?php else : ?>
+                            <div class="court-cover d-flex align-items-center justify-content-center text-muted bg-white border-bottom">
+                                <i class="bi bi-camera fs-2"></i>
+                            </div>
+                        <?php endif; ?>
+                        <div class="p-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h6 class="fw-bold mb-0"><?= htmlspecialchars($court['name']) ?></h6>
+                                <span class="badge <?= ($court['status'] === 'available') ? 'bg-success' : 'bg-warning text-dark' ?>">
+                                    <?= ($court['status'] === 'available') ? 'DISPONÍVEL' : 'MANUTENÇÃO' ?>
+                                </span>
+                            </div>
+                            <small class="text-muted d-block mb-2"><i class="bi bi-sun"></i> Modalidade: Beach Tennis</small>
+                            <a href="/courts/<?= $court->id ?>" class="btn btn-outline-primary btn-sm" id="btn_view_gallery_<?= $court->id ?>">
+                                <i class="bi bi-images"></i> Ver galeria (<?= $court->imagesCount() ?> fotos)
+                            </a>
                         </div>
-                        <small class="text-muted d-block"><i class="bi bi-sun"></i> Modalidade: Beach Tennis</small>
                     </div>
                 </div>
             <?php endforeach; ?>

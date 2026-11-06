@@ -1,0 +1,37 @@
+<div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+    <div>
+        <h1 class="h3 fw-bold text-dark mb-0">Galeria: <?= htmlspecialchars($court->name) ?></h1>
+        <small class="text-secondary">
+            <span class="badge <?= $court->isAvailable() ? 'bg-success' : 'bg-warning text-dark' ?>">
+                <?= $court->isAvailable() ? 'DISPONÍVEL' : 'MANUTENÇÃO' ?>
+            </span>
+            &bull; <?= count($images) ?> foto(s)
+        </small>
+    </div>
+    <a href="/dashboard" class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-arrow-left"></i> Voltar à Área do Aluno
+    </a>
+</div>
+
+<?php if (empty($images)) : ?>
+    <div class="text-center text-muted py-5 bg-white rounded shadow-sm" id="empty_gallery">
+        <i class="bi bi-camera fs-1 d-block mb-2"></i>
+        Esta quadra ainda não possui fotos.
+    </div>
+<?php else : ?>
+    <div class="row g-4" id="court_gallery">
+        <?php foreach ($images as $image) : ?>
+            <div class="col-sm-6 col-lg-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <a href="<?= htmlspecialchars($image->url()) ?>" target="_blank" rel="noopener">
+                        <img src="<?= htmlspecialchars($image->url()) ?>" class="card-img-top gallery-thumb"
+                             alt="<?= htmlspecialchars($image->caption ?? $court->name) ?>">
+                    </a>
+                    <div class="card-body py-2">
+                        <p class="small mb-0 text-muted"><?= htmlspecialchars($image->caption ?? 'Sem legenda') ?></p>
+                    </div>
+                </div>
+            </div>
+        <?php endforeach; ?>
+    </div>
+<?php endif; ?>

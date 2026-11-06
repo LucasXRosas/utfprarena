@@ -3,6 +3,9 @@
 namespace Tests\Unit\Models;
 
 use App\Models\Court;
+use App\Models\CourtImage;
+use App\Services\CourtGallery;
+use Core\Database\ActiveRecord\HasMany;
 use Core\Database\Database;
 use Tests\TestCase;
 
@@ -82,5 +85,42 @@ class CourtTest extends TestCase
 
         $this->court1['name'] = 'Quadra Modificada';
         $this->assertEquals('Quadra Modificada', $this->court1->name);
+    }
+
+    public function test_court_images_relationship_is_has_many(): void
+    {
+        $this->assertInstanceOf(HasMany::class, $this->court1->images());
+        $this->assertInstanceOf(CourtGallery::class, $this->court1->gallery());
+        $this->assertEmpty($this->court1->images);
+        $this->assertEquals(0, $this->court1->imagesCount());
+        $this->assertNull($this->court1->coverImage());
+    }
+
+    public function test_cover_image_is_first_image_of_gallery(): void
+    {
+        $first = $this->court1->images()->new([
+            'file_name' => 'court_1.png', 'original_name' => '1.png', 'mime_type' => 'image/png', 'size' => 1,
+        ]);
+        $first->save();
+        $second = $this->court1->images()->new([
+            'file_name' => 'court_2.png', 'original_name' => '2.png', 'mime_type' => 'image/png', 'size' => 1,
+        ]);
+        $second->save();
+
+        $this->assertEquals(2, $this->court1->imagesCount());
+        $this->assertEquals($first->id, $this->court1->coverImage()?->id);
+        $this->assertEquals(0, $this->court2->imagesCount());
+    }
+
+    public function test_destroy_removes_court_and_its_images(): void
+    {
+        $image = $this->court1->images()->new([
+            'file_name' => 'court_x.png', 'original_name' => 'x.png', 'mime_type' => 'image/png', 'size' => 1,
+        ]);
+        $image->save();
+
+        $this->assertTrue($this->court1->destroy());
+        $this->assertNull(Court::findById($this->court1->id));
+        $this->assertNull(CourtImage::findById($image->id));
     }
 }

@@ -72,11 +72,56 @@ class AdminControllerTest extends ControllerTestCase
             params: ['user' => ['name' => '']]
         );
 
-        $this->assertMatchesRegularExpression('/Location: \/admin\/users\/new/', $response);
-        $this->assertMatchesRegularExpression(
-            '/Todos os campos obrigatórios/',
-            $_SESSION['flash']['danger'] ?? ''
+        // Não redireciona: renderiza o formulário com o erro embaixo de cada campo obrigatório
+        $this->assertStringNotContainsString('Location:', $response);
+        $this->assertStringContainsString('Corrija os campos destacados', $response);
+        $this->assertMatchesRegularExpression('/id="error_user_name">Não pode ser vazio!/', $response);
+        $this->assertMatchesRegularExpression('/id="error_user_email">Não pode ser vazio!/', $response);
+        $this->assertMatchesRegularExpression('/id="error_user_password">Não pode ser vazio!/', $response);
+        $this->assertStringContainsString('class="form-control is-invalid" id="user_name"', $response);
+    }
+
+    public function test_create_keeps_typed_values_and_shows_format_errors(): void
+    {
+        $response = $this->post(
+            action: 'create',
+            controllerName: 'App\Controllers\Admin\UsersController',
+            params: [
+                'user' => [
+                    'name' => 'Atleta Digitado',
+                    'email' => 'email-invalido',
+                    'cpf' => '12345678900',
+                    'password' => '123',
+                    'password_confirmation' => '123',
+                ]
+            ]
         );
+
+        $this->assertStringContainsString('value="Atleta Digitado"', $response);
+        $this->assertMatchesRegularExpression('/id="error_user_email">Deve ser um e-mail válido!/', $response);
+        $this->assertMatchesRegularExpression('/id="error_user_cpf">Deve estar no formato 000.000.000-00!/', $response);
+        $this->assertMatchesRegularExpression('/id="error_user_password">Deve ter no mínimo 6 caracteres!/', $response);
+        $this->assertNull(User::findBy(['name' => 'Atleta Digitado']));
+    }
+
+    public function test_create_rejects_invalid_role(): void
+    {
+        $response = $this->post(
+            action: 'create',
+            controllerName: 'App\Controllers\Admin\UsersController',
+            params: [
+                'user' => [
+                    'name' => 'Papel Forjado',
+                    'email' => 'forjado@arena.com',
+                    'role' => 'superadmin',
+                    'password' => '123456',
+                    'password_confirmation' => '123456',
+                ]
+            ]
+        );
+
+        $this->assertMatchesRegularExpression('/id="error_user_role">Possui um valor inválido!/', $response);
+        $this->assertNull(User::findByEmail('forjado@arena.com'));
     }
 
     public function test_create_fails_with_mismatched_password(): void
@@ -94,11 +139,12 @@ class AdminControllerTest extends ControllerTestCase
             ]
         );
 
-        $this->assertMatchesRegularExpression('/Location: \/admin\/users\/new/', $response);
-        $this->assertEquals(
-            'As senhas devem ser idênticas!',
-            $_SESSION['flash']['danger'] ?? null
+        $this->assertStringNotContainsString('Location:', $response);
+        $this->assertMatchesRegularExpression(
+            '/id="error_user_password_confirmation">As senhas devem ser idênticas!/',
+            $response
         );
+        $this->assertNull(User::findByEmail('novo@arena.com'));
     }
 
     public function test_create_succeeds(): void
@@ -165,11 +211,122 @@ class AdminControllerTest extends ControllerTestCase
             ]
         );
 
-        $this->assertMatchesRegularExpression('/Location: \/admin\/users\/' . $this->student->id . '\/edit/', $response);
+        $this->assertStringNotContainsString('Location:', $response);
+        $this->assertStringContainsString('Editar Atleta #' . $this->student->id, $response);
+        $this->assertMatchesRegularExpression('/id="error_user_name">Não pode ser vazio!/', $response);
+        $this->assertEquals('Student Test', User::findById((int) $this->student->id)?->name);
+    }
+
+    public function test_update_changes_password_when_informed(): void
+    {
+        $this->put(
+            action: 'update',
+            controllerName: 'App\Controllers\Admin\UsersController',
+            params: [
+                'id' => $this->student->id,
+                'user' => [
+                    'name' => 'Student Test',
+                    'email' => $this->student->email,
+                    'password' => 'novaSenha1',
+                    'password_confirmation' => 'novaSenha1',
+                ]
+            ]
+        );
+
+        $updated = User::findById((int) $this->student->id);
+        $this->assertNotNull($updated);
+        $this->assertTrue($updated->authenticate('novaSenha1'));
+        $this->assertFalse($updated->authenticate('secret123'));
+    }
+
+    public function test_update_rejects_short_or_mismatched_password(): void
+    {
+        $response = $this->put(
+            action: 'update',
+            controllerName: 'App\Controllers\Admin\UsersController',
+            params: [
+                'id' => $this->student->id,
+                'user' => [
+                    'name' => 'Student Test',
+                    'email' => $this->student->email,
+                    'password' => 'abc',
+                    'password_confirmation' => 'xyz',
+                ]
+            ]
+        );
+
+        $this->assertMatchesRegularExpression('/id="error_user_password">Deve ter no mínimo 6 caracteres!/', $response);
+        $this->assertMatchesRegularExpression(
+            '/id="error_user_password_confirmation">As senhas devem ser idênticas!/',
+            $response
+        );
+        $this->assertTrue(User::findById((int) $this->student->id)?->authenticate('secret123'));
+    }
+
+    public function test_update_does_not_change_password_when_left_blank(): void
+    {
+        $this->put(
+            action: 'update',
+            controllerName: 'App\Controllers\Admin\UsersController',
+            params: [
+                'id' => $this->student->id,
+                'user' => ['name' => 'Student Test', 'email' => $this->student->email, 'password' => '']
+            ]
+        );
+
+        $this->assertTrue(User::findById((int) $this->student->id)?->authenticate('secret123'));
+    }
+
+    public function test_admin_cannot_demote_or_block_himself(): void
+    {
+        $response = $this->put(
+            action: 'update',
+            controllerName: 'App\Controllers\Admin\UsersController',
+            params: [
+                'id' => $this->admin->id,
+                'user' => [
+                    'name' => 'Admin Test',
+                    'email' => $this->admin->email,
+                    'role' => User::ROLE_STUDENT,
+                    'status' => User::STATUS_BLOCKED,
+                ]
+            ]
+        );
+
+        $this->assertMatchesRegularExpression('/id="error_user_role">Você não pode remover/', $response);
+        $this->assertMatchesRegularExpression('/id="error_user_status">Você não pode bloquear/', $response);
+
+        $admin = User::findById((int) $this->admin->id);
+        $this->assertNotNull($admin);
+        $this->assertTrue($admin->isAdmin());
+        $this->assertTrue($admin->isActive());
+    }
+
+    public function test_admin_cannot_block_himself_via_block_action(): void
+    {
+        $this->post(
+            action: 'block',
+            controllerName: 'App\Controllers\Admin\UsersController',
+            params: ['id' => $this->admin->id]
+        );
+
+        $this->assertTrue(User::findById((int) $this->admin->id)?->isActive());
         $this->assertEquals(
-            'Nome e e-mail são obrigatórios.',
+            'Não é permitido bloquear o próprio administrador conectado.',
             $_SESSION['flash']['danger'] ?? null
         );
+    }
+
+    public function test_update_with_nonexistent_id_redirects(): void
+    {
+        $response = $this->put(
+            action: 'update',
+            controllerName: 'App\Controllers\Admin\UsersController',
+            params: ['id' => 9999, 'user' => ['name' => 'X', 'email' => 'x@arena.com']]
+        );
+
+        $this->assertStringContainsString('Location: /admin/users', $response);
+        $this->assertEquals('Usuário não encontrado.', $_SESSION['flash']['danger'] ?? null);
     }
 
     public function test_update_succeeds(): void

@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Services\CourtGallery;
+use Core\Database\ActiveRecord\HasMany;
 use Core\Database\ActiveRecord\Model;
 use Core\Database\Database;
 use Lib\Validations;
@@ -13,6 +15,7 @@ use PDO;
  * @property string $type
  * @property string $status
  * @property ?string $created_at
+ * @property array<CourtImage> $images
  */
 class Court extends Model
 {
@@ -106,5 +109,52 @@ class Court extends Model
     public static function available(): array
     {
         return self::where(['status' => self::STATUS_AVAILABLE]);
+    }
+
+    /* ------------------- GALERIA DE FOTOS (RELAÇÃO 1xN) ------------------- */
+
+    /**
+     * Uma quadra possui N imagens (court_images.court_id -> courts.id).
+     */
+    public function images(): HasMany
+    {
+        return $this->hasMany(CourtImage::class, 'court_id');
+    }
+
+    public function gallery(): CourtGallery
+    {
+        return new CourtGallery($this);
+    }
+
+    /**
+     * Primeira foto da galeria, usada como capa nos cards.
+     */
+    public function coverImage(): ?CourtImage
+    {
+        $images = $this->gallery()->images();
+        return $images[0] ?? null;
+    }
+
+    public function imagesCount(): int
+    {
+        return count($this->gallery()->images());
+    }
+
+    /**
+     * Exclui a quadra e toda a sua galeria.
+     *  - Banco: as linhas de court_images são removidas pelo ON DELETE CASCADE da FK;
+     *  - Filesystem: a pasta uploads/courts/{id} é apagada pela aplicação,
+     *    pois o banco não conhece os arquivos físicos.
+     */
+    public function destroy(): bool
+    {
+        $gallery = $this->gallery();
+        $deleted = parent::destroy();
+
+        if ($deleted) {
+            $gallery->destroyFiles();
+        }
+
+        return $deleted;
     }
 }

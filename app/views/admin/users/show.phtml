@@ -22,7 +22,8 @@
             </div>
             <div class="card-body">
                 <div class="text-center mb-3">
-                    <div class="display-4 text-primary"><i class="bi bi-person-circle"></i></div>
+                    <img src="<?= htmlspecialchars($targetUser->avatar()->path()) ?>" alt="Foto do atleta"
+                         class="avatar-lg rounded-circle border border-3 border-warning mb-2" id="athlete_avatar">
                     <h5 class="fw-bold mb-1" id="athlete_name"><?= htmlspecialchars($targetUser->name) ?></h5>
                     <p class="text-muted small" id="athlete_email"><?= htmlspecialchars($targetUser->email) ?></p>
                 </div>

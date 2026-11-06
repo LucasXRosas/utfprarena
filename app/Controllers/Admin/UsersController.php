@@ -2,121 +2,74 @@
 
 namespace App\Controllers\Admin;
 
-use App\Models\Court;
 use App\Models\Invoice;
 use App\Models\User;
 use Core\Http\Controllers\Controller;
 use Core\Http\Request;
 use Lib\FlashMessage;
 
+/**
+ * CRUD RESTful de atletas/usuários (área administrativa).
+ *
+ * As regras de validação ficam no model (User::validates()). Quando o save() falha,
+ * o controller renderiza o formulário novamente (sem redirecionar) para preservar o que
+ * foi digitado e exibir cada erro embaixo do respectivo campo.
+ */
 class UsersController extends Controller
 {
+    private const PER_PAGE = 5;
+
     /**
      * RESTful: GET /admin/users
-     * Lista todos os usuários de forma paginada e exibe métricas da arena.
+     * Lista os usuários de forma paginada e exibe métricas da arena.
      */
     public function index(Request $request): void
     {
         $user = $this->currentUser();
         $title = 'Painel Gerencial - Gestão de Atletas';
 
-        $page = (int) $request->getParam('page', 1);
-        if ($page < 1) {
-            $page = 1;
-        }
+        $page = max(1, (int) $request->getParam('page', 1));
 
-        // 5 registros por página para demonstrar paginação
-        $perPage = 5;
         $paginator = User::paginate(
             page: $page,
-            per_page: $perPage,
+            per_page: self::PER_PAGE,
             route: 'admin.users.index',
             order: 'id ASC'
         );
-
         $users = $paginator->registers();
-        $courts = Court::all();
 
-        // Métricas delegadas ao modelo
         $totalUsers = User::countTotal();
         $activeUsers = User::countActive();
         $blockedUsers = User::countBlocked();
 
         $this->render(
             'admin/users/index',
-            compact(
-                'title',
-                'user',
-                'users',
-                'paginator',
-                'courts',
-                'totalUsers',
-                'activeUsers',
-                'blockedUsers'
-            )
+            compact('title', 'user', 'users', 'paginator', 'totalUsers', 'activeUsers', 'blockedUsers')
         );
     }
 
     /**
      * RESTful: GET /admin/users/new
-     * Exibe o formulário de cadastro de novo usuário.
      */
     public function new(Request $request): void
     {
-        $title = 'Cadastrar Novo Atleta - UTFPR Arena';
-        $targetUser = new User([
-            'role' => User::ROLE_STUDENT,
-            'status' => User::STATUS_ACTIVE
-        ]);
-
-        $this->render('admin/users/new', compact('title', 'targetUser'));
+        $this->renderForm('new', new User());
     }
 
     /**
      * RESTful: POST /admin/users
-     * Processa a criação de um novo usuário com validação explícita de parâmetros.
      */
     public function create(Request $request): void
     {
-        $name = trim((string) $this->extractParam($request, 'name'));
-        $email = trim((string) $this->extractParam($request, 'email'));
-        $password = (string) $this->extractParam($request, 'password');
-        $passwordConfirmation = (string) $this->extractParam($request, 'password_confirmation');
-        $phone = trim((string) $this->extractParam($request, 'phone'));
-        $cpf = trim((string) $this->extractParam($request, 'cpf'));
-        $role = (string) $this->extractParam($request, 'role', User::ROLE_STUDENT);
-        $status = (string) $this->extractParam($request, 'status', User::STATUS_ACTIVE);
+        $passwords = $this->passwordParams($request);
 
-        // Validação explícita de campos obrigatórios
-        if ($name === '' || $email === '' || $password === '' || $passwordConfirmation === '') {
-            FlashMessage::danger('Todos os campos obrigatórios (nome, e-mail, senha e confirmação) devem ser preenchidos.');
-            $this->redirectTo(route('admin.users.new'));
-            return;
-        }
-
-        if ($password !== $passwordConfirmation) {
-            FlashMessage::danger('As senhas devem ser idênticas!');
-            $this->redirectTo(route('admin.users.new'));
-            return;
-        }
-
-        $targetUser = new User([
-            'name' => $name,
-            'email' => $email,
-            'password' => $password,
-            'password_confirmation' => $passwordConfirmation,
-            'phone' => $phone !== '' ? $phone : null,
-            'cpf' => $cpf !== '' ? $cpf : null,
-            'role' => in_array($role, [User::ROLE_STUDENT, User::ROLE_MANAGER], true) ? $role : User::ROLE_STUDENT,
-            'status' => in_array($status, [User::STATUS_ACTIVE, User::STATUS_BLOCKED], true)
-                ? $status
-                : User::STATUS_ACTIVE
-        ]);
+        $targetUser = new User(array_merge($this->userParams($request), [
+            'password' => $passwords['password'],
+            'password_confirmation' => $passwords['password_confirmation'],
+        ]));
 
         if (!$targetUser->save()) {
-            $errorMsg = $targetUser->firstError() ?? 'Dados de cadastro inválidos.';
-            FlashMessage::danger('Erro ao cadastrar: ' . $errorMsg);
-            $this->redirectTo(route('admin.users.new'));
+            $this->renderForm('new', $targetUser);
             return;
         }
 
@@ -130,15 +83,8 @@ class UsersController extends Controller
      */
     public function show(Request $request): void
     {
-        $id = $this->validateIdParam($request);
-        if ($id === null) {
-            return;
-        }
-
-        $targetUser = User::findById($id);
+        $targetUser = $this->findUserOrRedirect($request);
         if ($targetUser === null) {
-            FlashMessage::danger('Usuário não encontrado.');
-            $this->redirectTo(route('admin.users.index'));
             return;
         }
 
@@ -150,86 +96,57 @@ class UsersController extends Controller
 
     /**
      * RESTful: GET /admin/users/{id}/edit
-     * Exibe o formulário de edição de dados do usuário.
      */
     public function edit(Request $request): void
     {
-        $id = $this->validateIdParam($request);
-        if ($id === null) {
-            return;
-        }
-
-        $targetUser = User::findById($id);
+        $targetUser = $this->findUserOrRedirect($request);
         if ($targetUser === null) {
-            FlashMessage::danger('Usuário não encontrado.');
-            $this->redirectTo(route('admin.users.index'));
             return;
         }
 
-        $title = 'Editar Atleta: ' . $targetUser->name;
-        $this->render('admin/users/edit', compact('title', 'targetUser'));
+        $this->renderForm('edit', $targetUser);
     }
 
     /**
      * RESTful: PUT /admin/users/{id}
-     * Processa a atualização dos dados do usuário.
      */
     public function update(Request $request): void
     {
-        $id = $this->validateIdParam($request);
-        if ($id === null) {
-            return;
-        }
-
-        $targetUser = User::findById($id);
+        $targetUser = $this->findUserOrRedirect($request);
         if ($targetUser === null) {
-            FlashMessage::danger('Usuário não encontrado.');
-            $this->redirectTo(route('admin.users.index'));
             return;
         }
 
-        $name = trim((string) $this->extractParam($request, 'name'));
-        $email = trim((string) $this->extractParam($request, 'email'));
-        $phone = trim((string) $this->extractParam($request, 'phone'));
-        $cpf = trim((string) $this->extractParam($request, 'cpf'));
-        $role = (string) $this->extractParam($request, 'role', $targetUser->role);
-        $status = (string) $this->extractParam($request, 'status', $targetUser->status);
-        $password = (string) $this->extractParam($request, 'password', '');
-        $passwordConfirmation = (string) $this->extractParam($request, 'password_confirmation', '');
-
-        if ($name === '' || $email === '') {
-            FlashMessage::danger('Nome e e-mail são obrigatórios.');
-            $this->redirectTo(route('admin.users.edit', ['id' => $id]));
-            return;
-        }
-
-        // Atualização de senha opcional
-        if ($password !== '') {
-            if ($password !== $passwordConfirmation) {
-                FlashMessage::danger('As senhas devem ser idênticas!');
-                $this->redirectTo(route('admin.users.edit', ['id' => $id]));
-                return;
+        foreach ($this->userParams($request) as $attribute => $value) {
+            // role/status ausentes na requisição mantêm o valor atual
+            if ($value !== null || !in_array($attribute, ['role', 'status'], true)) {
+                $targetUser->$attribute = $value;
             }
-            $targetUser->changePassword($password);
         }
 
-        $targetUser->name = $name;
-        $targetUser->email = $email;
-        $targetUser->phone = $phone !== '' ? $phone : null;
-        $targetUser->cpf = $cpf !== '' ? $cpf : null;
-
-        if (in_array($role, [User::ROLE_STUDENT, User::ROLE_MANAGER], true)) {
-            $targetUser->role = $role;
+        // Senha é opcional na edição: só troca se algum dos dois campos for preenchido
+        $passwords = $this->passwordParams($request);
+        if ($passwords['password'] !== '' || $passwords['password_confirmation'] !== '') {
+            $targetUser->updatePassword($passwords['password'], $passwords['password_confirmation']);
         }
 
-        if (in_array($status, [User::STATUS_ACTIVE, User::STATUS_BLOCKED], true)) {
-            $targetUser->status = $status;
+        // O admin logado não pode se rebaixar nem se bloquear (perderia o acesso ao painel)
+        if ($this->isCurrentUser($targetUser) && (!$targetUser->isAdmin() || !$targetUser->isActive())) {
+            $targetUser->isValid(); // coleta os demais erros do formulário (isValid() limpa os anteriores)
+
+            if (!$targetUser->isAdmin()) {
+                $targetUser->addError('role', 'você não pode remover o seu próprio perfil de administrador!');
+            }
+            if (!$targetUser->isActive()) {
+                $targetUser->addError('status', 'você não pode bloquear o seu próprio acesso!');
+            }
+
+            $this->renderForm('edit', $targetUser);
+            return;
         }
 
         if (!$targetUser->save()) {
-            $errorMsg = $targetUser->firstError() ?? 'Dados inválidos.';
-            FlashMessage::danger('Erro ao atualizar: ' . $errorMsg);
-            $this->redirectTo(route('admin.users.edit', ['id' => $id]));
+            $this->renderForm('edit', $targetUser);
             return;
         }
 
@@ -239,107 +156,140 @@ class UsersController extends Controller
 
     /**
      * RESTful: DELETE /admin/users/{id}
-     * Remove um usuário do sistema.
      */
     public function destroy(Request $request): void
     {
-        $id = $this->validateIdParam($request);
-        if ($id === null) {
-            return;
-        }
-
-        $targetUser = User::findById($id);
+        $targetUser = $this->findUserOrRedirect($request);
         if ($targetUser === null) {
-            FlashMessage::danger('Usuário não encontrado.');
-            $this->redirectTo(route('admin.users.index'));
             return;
         }
 
-        // Impede que o próprio administrador logado se delete
-        $loggedUser = $this->currentUser();
-        if ($loggedUser !== null && $loggedUser->id === $targetUser->id) {
+        if ($this->isCurrentUser($targetUser)) {
             FlashMessage::danger('Não é permitido remover o próprio administrador conectado.');
             $this->redirectTo(route('admin.users.index'));
             return;
         }
 
-        $name = $targetUser->name;
         $targetUser->destroy();
 
-        FlashMessage::success('Usuário ' . $name . ' foi removido com sucesso!');
+        FlashMessage::success('Usuário ' . $targetUser->name . ' foi removido com sucesso!');
         $this->redirectTo(route('admin.users.index'));
     }
 
     /**
-     * Ação de controle de acesso: POST /admin/users/{id}/block
+     * Controle de acesso (catraca): POST /admin/users/{id}/block
      */
     public function block(Request $request): void
     {
-        $id = $this->validateIdParam($request);
-        if ($id === null) {
+        $targetUser = $this->findUserOrRedirect($request);
+        if ($targetUser === null) {
             return;
         }
 
-        $targetUser = User::findById($id);
-        if ($targetUser === null) {
-            FlashMessage::danger('Usuário não encontrado.');
+        if ($this->isCurrentUser($targetUser)) {
+            FlashMessage::danger('Não é permitido bloquear o próprio administrador conectado.');
             $this->redirectTo(route('admin.users.index'));
             return;
         }
 
-        $targetUser->block();
-        $targetUser->save();
+        // update() grava só o status: não depende da validação dos demais campos
+        $targetUser->update(['status' => User::STATUS_BLOCKED]);
         FlashMessage::danger('Acesso do usuário ' . $targetUser->name . ' foi bloqueado.');
-
         $this->redirectTo(route('admin.users.index'));
     }
 
     /**
-     * Ação de controle de acesso: POST /admin/users/{id}/activate
+     * Controle de acesso (catraca): POST /admin/users/{id}/activate
      */
     public function activate(Request $request): void
     {
-        $id = $this->validateIdParam($request);
-        if ($id === null) {
-            return;
-        }
-
-        $targetUser = User::findById($id);
+        $targetUser = $this->findUserOrRedirect($request);
         if ($targetUser === null) {
-            FlashMessage::danger('Usuário não encontrado.');
-            $this->redirectTo(route('admin.users.index'));
             return;
         }
 
-        $targetUser->activate();
-        $targetUser->save();
+        $targetUser->update(['status' => User::STATUS_ACTIVE]);
         FlashMessage::success('Acesso do usuário ' . $targetUser->name . ' foi reativado.');
-
         $this->redirectTo(route('admin.users.index'));
     }
 
-    private function validateIdParam(Request $request): ?int
+    /* ---------------- helpers ---------------- */
+
+    /**
+     * Renderiza o formulário de cadastro/edição. Com erros de validação, responde 422.
+     */
+    private function renderForm(string $view, User $targetUser): void
     {
-        $idParam = $request->getParam('id');
-        if ($idParam === null || !is_numeric($idParam)) {
-            FlashMessage::danger('Parâmetro id obrigatório ausente ou inválido.');
+        if ($targetUser->hasErrors()) {
+            http_response_code(422);
+            FlashMessage::danger('Não foi possível salvar. Corrija os campos destacados.');
+        }
+
+        $title = $targetUser->newRecord()
+            ? 'Cadastrar Novo Atleta - UTFPR Arena'
+            : 'Editar Atleta #' . $targetUser->id;
+
+        $this->render('admin/users/' . $view, compact('title', 'targetUser'));
+    }
+
+    private function findUserOrRedirect(Request $request): ?User
+    {
+        $id = $request->getParam('id');
+        $targetUser = is_numeric($id) ? User::findById((int) $id) : null;
+
+        if ($targetUser === null) {
+            FlashMessage::danger('Usuário não encontrado.');
             $this->redirectTo(route('admin.users.index'));
             return null;
         }
 
-        return (int) $idParam;
+        return $targetUser;
     }
 
-    private function extractParam(Request $request, string $key, mixed $default = null): mixed
+    private function isCurrentUser(User $targetUser): bool
     {
-        if ($request->hasParam("user.{$key}")) {
-            return $request->getParam("user.{$key}");
-        }
+        $loggedUser = $this->currentUser();
+        return $loggedUser !== null && $loggedUser->id === $targetUser->id;
+    }
 
-        if ($request->hasParam($key)) {
-            return $request->getParam($key);
-        }
+    /**
+     * Lista explícita dos campos aceitos do formulário (evita atribuição em massa de colunas
+     * sensíveis como encrypted_password ou remember_token).
+     *
+     * @return array<string, ?string>
+     */
+    private function userParams(Request $request): array
+    {
+        $data = $request->getParam('user', []);
+        $data = is_array($data) ? $data : [];
 
-        return $default;
+        $text = function (string $key) use ($data): ?string {
+            $value = trim((string) ($data[$key] ?? ''));
+            return $value === '' ? null : $value;
+        };
+
+        $email = $text('email');
+
+        return [
+            'name' => $text('name'),
+            'email' => $email !== null ? mb_strtolower($email) : null,
+            'phone' => $text('phone'),
+            'cpf' => $text('cpf'),
+            'role' => $text('role'),
+            'status' => $text('status'),
+        ];
+    }
+
+    /**
+     * Senhas não passam por trim(): espaços fazem parte da senha.
+     *
+     * @return array{password: string, password_confirmation: string}
+     */
+    private function passwordParams(Request $request): array
+    {
+        return [
+            'password' => (string) $request->getParam('user.password', ''),
+            'password_confirmation' => (string) $request->getParam('user.password_confirmation', ''),
+        ];
     }
 }

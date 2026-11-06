@@ -35,10 +35,16 @@
                         <li class="nav-item">
                             <a class="nav-link" href="/dashboard"><i class="bi bi-person-badge"></i> Área do Aluno</a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/profile" id="nav_profile"><i class="bi bi-person-circle"></i> Meu Perfil</a>
+                        </li>
                         <?php $loggedUser = \Lib\Authentication\Auth::user(); ?>
                         <?php if ($loggedUser && $loggedUser->isAdmin()) : ?>
                             <li class="nav-item">
                                 <a class="nav-link text-warning" href="/admin"><i class="bi bi-speedometer2"></i> Painel Gerencial</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-warning" href="/admin/courts" id="nav_admin_courts"><i class="bi bi-images"></i> Quadras e Galerias</a>
                             </li>
                         <?php endif; ?>
                     <?php endif; ?>
@@ -47,6 +53,12 @@
                 <div class="d-flex align-items-center gap-3">
                     <?php if (\Lib\Authentication\Auth::check()) : ?>
                         <?php $loggedUser = \Lib\Authentication\Auth::user(); ?>
+                        <?php if ($loggedUser) : ?>
+                            <a href="/profile" title="Meu Perfil">
+                                <img src="<?= htmlspecialchars($loggedUser->avatar()->path()) ?>" alt="Avatar"
+                                     class="avatar-sm rounded-circle border border-warning" id="nav_avatar">
+                            </a>
+                        <?php endif; ?>
                         <div class="text-light small text-end d-none d-md-block">
                             <div class="fw-semibold"><?= htmlspecialchars($loggedUser ? $loggedUser->name : 'Usuário') ?></div>
                             <span class="badge <?= ($loggedUser && $loggedUser->isAdmin()) ? 'bg-danger' : 'bg-primary' ?>">

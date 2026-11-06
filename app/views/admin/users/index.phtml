@@ -4,6 +4,9 @@
         <small class="text-secondary">Administração e controle de acesso da UTFPR Arena Beach Tennis</small>
     </div>
     <div class="d-flex align-items-center gap-2">
+        <a href="/admin/courts" class="btn btn-outline-primary btn-sm d-flex align-items-center gap-1 shadow-sm" id="btn_manage_courts">
+            <i class="bi bi-images"></i> Quadras e Galerias
+        </a>
         <a href="/admin/users/new" class="btn btn-primary btn-sm d-flex align-items-center gap-1 shadow-sm" id="btn_new_user">
             <i class="bi bi-person-plus-fill"></i> Cadastrar Atleta
         </a>
@@ -124,13 +127,13 @@
                                         </a>
 
                                         <!-- Alternar Status (Catraca) -->
-                                        <?php if ($u->isActive()) : ?>
+                                        <?php if ($u->isActive() && $u->id !== $user?->id) : ?>
                                             <form action="/admin/users/<?= $u->id ?>/block" method="POST" class="d-inline m-0">
                                                 <button type="submit" class="btn btn-outline-warning btn-sm" title="Bloquear acesso à arena">
                                                     <i class="bi bi-lock-fill"></i> Bloquear
                                                 </button>
                                             </form>
-                                        <?php else : ?>
+                                        <?php elseif (!$u->isActive()) : ?>
                                             <form action="/admin/users/<?= $u->id ?>/activate" method="POST" class="d-inline m-0">
                                                 <button type="submit" class="btn btn-outline-success btn-sm" title="Reativar acesso à arena">
                                                     <i class="bi bi-unlock-fill"></i> Reativar
