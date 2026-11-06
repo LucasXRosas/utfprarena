@@ -79,7 +79,7 @@ class ProfileAvatarCest
         $page->attachFile('#avatar_file', 'malicioso.php.jpg');
         $page->click('#btn_upload_avatar');
 
-        $page->see('Erro ao enviar foto: Arquivo malicioso');
+        $page->see('Arquivo malicioso', '#error_avatar');
         $page->seeElement('#profile_default_avatar');
     }
 }

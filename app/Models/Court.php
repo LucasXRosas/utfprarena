@@ -53,6 +53,7 @@ class Court extends Model
     public function validates(): void
     {
         Validations::notEmpty('name', $this);
+        Validations::maxLength('name', $this, 100);
     }
 
     public function isAvailable(): bool

@@ -50,8 +50,10 @@ class CourtsController extends Controller
         ]);
 
         if (!$court->save()) {
-            FlashMessage::danger('Erro ao cadastrar quadra: nome ' . ($court->errors('name') ?? 'inválido'));
-            $this->redirectTo(route('admin.courts.new'));
+            // Renderiza o formulário de novo com o erro embaixo do campo (sem redirecionar)
+            http_response_code(422);
+            $title = 'Cadastrar Quadra - Painel Gerencial';
+            $this->render('admin/courts/new', compact('title', 'court'));
             return;
         }
 

@@ -7,35 +7,50 @@
                 <small class="text-secondary">UTFPR Arena Beach Tennis</small>
             </div>
             <div class="card-body p-4 bg-white">
-                <form action="/login" method="POST" id="login_form">
+<?php
+                $email = $email ?? '';
+                $errors = $errors ?? [];
+
+                // Campo com erro fica vermelho; a mensagem (se houver) aparece logo abaixo dele
+                $invalid = fn(string $field): string => array_key_exists($field, $errors) ? ' is-invalid' : '';
+                $feedback = fn(string $field): string => ($errors[$field] ?? '') !== ''
+                    ? '<div class="invalid-feedback" id="error_user_' . $field . '">' . htmlspecialchars($errors[$field]) . '</div>'
+                    : '';
+                ?>
+                <!-- novalidate: sem os balões do navegador; a validação é feita no backend -->
+                <form action="/login" method="POST" id="login_form" novalidate>
                     <div class="mb-3">
                         <label for="user_email" class="form-label fw-semibold">E-mail</label>
-                        <div class="input-group">
+                        <div class="input-group has-validation">
                             <span class="input-group-text bg-light"><i class="bi bi-envelope"></i></span>
-                            <input 
-                                type="email" 
-                                class="form-control" 
-                                id="user_email" 
-                                name="user[email]" 
-                                placeholder="exemplo@arena.com" 
-                                required 
-                                autofocus
+                            <input
+                                type="email"
+                                class="form-control<?= $invalid('email') ?>"
+                                id="user_email"
+                                name="user[email]"
+                                value="<?= htmlspecialchars($email) ?>"
+                                placeholder="exemplo@arena.com"
+                                autocomplete="username"
+                                <?= $email === '' || isset($errors['email']) ? 'autofocus' : '' ?>
                             >
+                            <?= $feedback('email') ?>
                         </div>
                     </div>
 
                     <div class="mb-4">
                         <label for="user_password" class="form-label fw-semibold">Senha</label>
-                        <div class="input-group">
+                        <div class="input-group has-validation">
                             <span class="input-group-text bg-light"><i class="bi bi-key"></i></span>
-                            <input 
-                                type="password" 
-                                class="form-control" 
-                                id="user_password" 
-                                name="user[password]" 
-                                placeholder="Digite sua senha" 
-                                required
+                            <input
+                                type="password"
+                                class="form-control<?= $invalid('password') ?>"
+                                id="user_password"
+                                name="user[password]"
+                                placeholder="Digite sua senha"
+                                autocomplete="current-password"
+                                <?= $email !== '' && !isset($errors['email']) ? 'autofocus' : '' ?>
                             >
+                            <?= $feedback('password') ?>
                         </div>
                     </div>
 

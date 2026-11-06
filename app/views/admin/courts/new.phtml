@@ -1,3 +1,4 @@
+<?php $nameError = $court->errors('name'); ?>
 <div class="row justify-content-center">
     <div class="col-lg-6">
         <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
@@ -12,17 +13,24 @@
 
         <div class="card border-0 shadow-sm">
             <div class="card-body p-4">
-                <form action="/admin/courts" method="POST" id="new_court_form">
+                <!-- novalidate: sem os balões do navegador; a validação é feita no backend -->
+                <form action="/admin/courts" method="POST" id="new_court_form" novalidate>
                     <div class="mb-3">
                         <label for="court_name" class="form-label fw-semibold">Nome da Quadra <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="court_name" name="court[name]"
-                               placeholder="Ex: Quadra 04 (Areia Fina)" required>
+                        <input type="text" class="form-control<?= $nameError !== null ? ' is-invalid' : '' ?>" id="court_name"
+                               name="court[name]" value="<?= htmlspecialchars((string) ($court->name ?? '')) ?>"
+                               placeholder="Ex: Quadra 04 (Areia Fina)" maxlength="100">
+                        <?php if ($nameError !== null) : ?>
+                            <div class="invalid-feedback" id="error_court_name">
+                                <?= htmlspecialchars('O nome da quadra ' . $nameError) ?>
+                            </div>
+                        <?php endif; ?>
                     </div>
                     <div class="mb-3">
                         <label for="court_status" class="form-label fw-semibold">Status</label>
                         <select class="form-select" id="court_status" name="court[status]">
-                            <option value="available">Disponível</option>
-                            <option value="maintenance">Em manutenção</option>
+                            <option value="available" <?= $court->isAvailable() ? 'selected' : '' ?>>Disponível</option>
+                            <option value="maintenance" <?= $court->isMaintenance() ? 'selected' : '' ?>>Em manutenção</option>
                         </select>
                     </div>
                     <button type="submit" class="btn btn-primary" id="btn_submit_court">

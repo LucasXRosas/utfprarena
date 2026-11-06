@@ -157,7 +157,7 @@ class CourtGalleryCest
         $page->amOnPage('/admin/courts/2');
         $this->uploadImage($page, self::BIG_FILE);
 
-        $page->see('Erro ao enviar imagem: O arquivo excede o tamanho máximo permitido de 2MB.');
+        $page->see('O arquivo excede o tamanho máximo permitido de 2MB.', '#error_image');
     }
 
     // Validação: upload malicioso (dupla extensão e script disfarçado)
@@ -167,10 +167,10 @@ class CourtGalleryCest
         $page->amOnPage('/admin/courts/2');
 
         $this->uploadImage($page, 'malicioso.php.jpg');
-        $page->see('Arquivo malicioso: extensões executáveis (.php) não são permitidas.');
+        $page->see('Arquivo malicioso: extensões executáveis (.php) não são permitidas.', '#error_image');
 
         $this->uploadImage($page, 'script_disfarcado.jpg');
-        $page->see('Arquivo malicioso ou inválido: o conteúdo real (text/x-php) não é uma imagem permitida.');
+        $page->see('Arquivo malicioso ou inválido: o conteúdo real (text/x-php) não é uma imagem permitida.', '#error_image');
     }
 
     // Integridade: excluir a quadra remove as imagens do banco e do filesystem
