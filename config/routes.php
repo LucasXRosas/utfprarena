@@ -1,7 +1,6 @@
 <?php
 
 use App\Controllers\Admin\UsersController as AdminUsersController;
-use App\Controllers\AdminController;
 use App\Controllers\AuthController;
 use App\Controllers\DashboardController;
 use App\Controllers\HomeController;
@@ -36,9 +35,5 @@ Route::middleware('auth')->group(function () {
         // Ações de controle de acesso (Catraca lógica)
         Route::post('/admin/users/{id}/block', [AdminUsersController::class, 'block'])->name('admin.users.block');
         Route::post('/admin/users/{id}/activate', [AdminUsersController::class, 'activate'])->name('admin.users.activate');
-
-        // Aliases legados para compatibilidade
-        Route::post('/admin/block/{id}', [AdminController::class, 'blockUser'])->name('admin.blockUser');
-        Route::post('/admin/activate/{id}', [AdminController::class, 'activateUser'])->name('admin.activateUser');
     });
 });

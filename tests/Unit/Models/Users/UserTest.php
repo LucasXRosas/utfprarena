@@ -101,7 +101,7 @@ class UserTest extends TestCase
         $this->assertFalse($user->isValid());
         $this->assertFalse($user->save());
 
-        $this->assertEquals('as senhas devem ser idênticas!', $user->errors('password'));
+        $this->assertEquals('as senhas devem ser idênticas!', $user->errors('password_confirmation'));
     }
 
     public function test_find_by_id_should_return_the_user(): void
@@ -179,6 +179,77 @@ class UserTest extends TestCase
         $this->assertEquals(2, User::countTotal());
         $this->assertEquals(1, User::countActive());
         $this->assertEquals(1, User::countBlocked());
+    }
+
+    public function test_new_user_requires_password_with_min_length(): void
+    {
+        $user = new User(['name' => 'Sem Senha', 'email' => 'semsenha@example.com']);
+        $this->assertFalse($user->isValid());
+        $this->assertEquals('não pode ser vazio!', $user->errors('password'));
+
+        $user = new User([
+            'name' => 'Senha Curta',
+            'email' => 'curta@example.com',
+            'password' => '123',
+            'password_confirmation' => '123',
+        ]);
+        $this->assertFalse($user->isValid());
+        $this->assertEquals('deve ter no mínimo 6 caracteres!', $user->errors('password'));
+    }
+
+    public function test_email_must_be_valid(): void
+    {
+        $this->user->email = 'sem-arroba';
+        $this->assertFalse($this->user->isValid());
+        $this->assertEquals('deve ser um e-mail válido!', $this->user->errors('email'));
+    }
+
+    public function test_cpf_must_have_format_and_be_unique(): void
+    {
+        $this->user->cpf = '12345678900';
+        $this->assertFalse($this->user->isValid());
+        $this->assertEquals('deve estar no formato 000.000.000-00!', $this->user->errors('cpf'));
+
+        $this->user->cpf = '123.456.789-00';
+        $this->assertTrue($this->user->save());
+
+        $this->user2->cpf = '123.456.789-00';
+        $this->assertFalse($this->user2->isValid());
+        $this->assertEquals('já existe um registro com esse dado', $this->user2->errors('cpf'));
+    }
+
+    public function test_role_and_status_must_be_known_values(): void
+    {
+        $this->user->role = 'superadmin';
+        $this->user->status = 'qualquer';
+        $this->assertFalse($this->user->isValid());
+        $this->assertEquals('possui um valor inválido!', $this->user->errors('role'));
+        $this->assertEquals('possui um valor inválido!', $this->user->errors('status'));
+    }
+
+    public function test_update_keeps_own_email_valid_even_with_different_case(): void
+    {
+        // A collation do MySQL ignora maiúsculas: o próprio registro não pode contar como duplicado
+        $this->user->email = 'FULANO@example.com';
+        $this->assertTrue($this->user->isValid());
+
+        $this->user->email = 'FULANO1@example.com'; // e-mail do user2
+        $this->assertFalse($this->user->isValid());
+    }
+
+    public function test_update_password_is_validated_and_applied(): void
+    {
+        $this->user->updatePassword('abc', 'abc');
+        $this->assertFalse($this->user->save());
+        $this->assertEquals('deve ter no mínimo 6 caracteres!', $this->user->errors('password'));
+
+        $this->user->updatePassword('novaSenha1', 'outra');
+        $this->assertFalse($this->user->save());
+        $this->assertEquals('as senhas devem ser idênticas!', $this->user->errors('password_confirmation'));
+
+        $this->user->updatePassword('novaSenha1', 'novaSenha1');
+        $this->assertTrue($this->user->save());
+        $this->assertTrue(User::findById($this->user->id)?->authenticate('novaSenha1'));
     }
 
     public function test_user_invoices_relationship(): void
