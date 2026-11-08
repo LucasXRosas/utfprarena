@@ -22,7 +22,7 @@
             <div class="card-body">
                 <div class="text-center mb-3">
                     <img src="<?= htmlspecialchars($user ? $user->avatar()->path() : \App\Services\ProfileAvatar::DEFAULT_AVATAR) ?>"
-                         alt="Foto do atleta" class="avatar-lg rounded-circle border border-3 border-warning mb-2" id="dashboard_avatar">
+                         alt="Foto do atleta" class="avatar-lg rounded-circle border border-3 border-warning mb-2" id="dashboard_avatar" width="110" height="110">
                     <h5 class="fw-bold mb-1"><?= htmlspecialchars($user ? $user->name : 'Aluno') ?></h5>
                     <p class="text-muted small mb-1"><?= htmlspecialchars($user ? $user->email : '') ?></p>
                     <a href="/profile" class="small"><i class="bi bi-camera"></i> Alterar foto de perfil</a>
