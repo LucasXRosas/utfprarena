@@ -58,10 +58,10 @@ Deixe uma pasta `~/demo-upload` com:
 
 | Bloco | Tempo aprox. | Quem |
 |---|---|---|
-| Abertura + Demonstração prática (Seções 1–4) | 8–10 min | Integrante A |
-| Conceitos (Seção 5) | 4–5 min | Integrante B |
-| Código e framework (Seção 6) | 10–12 min | Integrante C |
-| Banco de dados (Seção 6.4) + Testes (Seção 7) | 6–8 min | Integrante D |
+| Abertura + Demonstração prática (Seções 1–4) | 8–10 min | Gabriel |
+| Conceitos (Seção 5) | 4–5 min | Lucas |
+| Código e framework (Seção 6) | 10–12 min | Lucas |
+| Banco de dados (Seção 6.4) + Testes (Seção 7) | 6–8 min | Gabriel |
 
 ---
 
