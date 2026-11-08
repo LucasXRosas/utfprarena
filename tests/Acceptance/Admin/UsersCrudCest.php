@@ -2,9 +2,10 @@
 
 namespace Tests\Acceptance\Admin;
 
+use Tests\Acceptance\BaseAcceptanceCest;
 use Tests\Support\AcceptanceTester;
 
-class UsersCrudCest
+class UsersCrudCest extends BaseAcceptanceCest
 {
     private function loginAsAdmin(AcceptanceTester $page): void
     {

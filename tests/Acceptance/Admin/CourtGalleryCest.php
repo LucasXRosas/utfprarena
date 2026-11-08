@@ -3,18 +3,21 @@
 namespace Tests\Acceptance\Admin;
 
 use PHPUnit\Framework\Assert;
+use Tests\Acceptance\BaseAcceptanceCest;
 use Tests\Support\AcceptanceTester;
 
 /**
  * Testes de aceitação da galeria de fotos das quadras (relação 1xN Court -> CourtImage).
  * Usa os dados do populate (admin@arena.com, aluno@arena.com e as quadras #1, #2 e #3).
  */
-class CourtGalleryCest
+class CourtGalleryCest extends BaseAcceptanceCest
 {
     private const BIG_FILE = 'imagem_grande.jpg';
 
     public function _before(AcceptanceTester $page): void
     {
+        parent::_before($page);
+
         // Gera um arquivo de 3MB (acima do limite de 2MB) apenas durante o teste
         $bigFile = codecept_data_dir() . self::BIG_FILE;
         if (!is_file($bigFile)) {
@@ -24,6 +27,8 @@ class CourtGalleryCest
 
     public function _after(AcceptanceTester $page): void
     {
+        parent::_after($page);
+
         $bigFile = codecept_data_dir() . self::BIG_FILE;
         if (is_file($bigFile)) {
             unlink($bigFile);
@@ -94,7 +99,8 @@ class CourtGalleryCest
         $page->see('Nenhuma foto cadastrada nesta galeria ainda.');
         $this->uploadImage($page, 'quadra_foto.jpg', 'Foto enviada pelo teste');
 
-        $page->see('enviada com sucesso! Arquivo salvo em: /assets/uploads/courts/');
+        $page->see('enviada com sucesso! Arquivo salvo em: /assets/uploads/');
+        $page->see('/courts/');
         $page->seeNumberOfElements('#court_gallery img', 1);
         $page->see('Foto enviada pelo teste');
         $page->see('arquivo presente');

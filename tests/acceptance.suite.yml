@@ -2,7 +2,7 @@ actor: AcceptanceTester
 modules:
   enabled:
     - WebDriver:
-        url: "http://web:80"
+        url: "http://web:8080" # porta de testes: php_test (APP_ENV=testing, banco arena_test)
         browser: chrome
         host: selenium # This refers to the Selenium hub in Docker
         port: 4444 # Default port for Selenium Hub

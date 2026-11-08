@@ -127,11 +127,15 @@ Para rodar apenas os testes de integração de acesso a rotas:
 ```
 
 ### 4.2 Testes de Aceitação / End-to-End (Codeception + Selenium)
-Executa a bateria de testes de navegador simulando os 4 fluxos exigidos na rubrica:
+Executa a bateria de testes de navegador (autenticação, CRUD, galeria de imagens e avatar):
 ```bash
 ./run test:browser
 ```
 *(ou equivalentemente: `./run codecept run acceptance`)*
+
+> **Ambiente isolado:** o navegador acessa a porta de testes `http://web:8080` (container `php_test`, banco `arena_test`, uploads em `public/assets/uploads/test`). Antes de **cada** cenário o banco de teste é recriado e populado pelo `Database\Populate\Seeder` (o mesmo usado pelo `./run db:populate`). Por isso:
+> - os testes podem ser executados várias vezes seguidas, em qualquer ordem, sem `db:reset`;
+> - o banco de desenvolvimento (`arena_development`) e os uploads usados no navegador **não são alterados**.
 
 ---
 
