@@ -3,12 +3,13 @@
 namespace Tests\Acceptance\Profile;
 
 use PHPUnit\Framework\Assert;
+use Tests\Acceptance\BaseAcceptanceCest;
 use Tests\Support\AcceptanceTester;
 
 /**
  * Testes de aceitação da aba "Meu Perfil" (upload, visualização e remoção do avatar).
  */
-class ProfileAvatarCest
+class ProfileAvatarCest extends BaseAcceptanceCest
 {
     private function loginAsStudent(AcceptanceTester $page): void
     {
@@ -37,7 +38,8 @@ class ProfileAvatarCest
 
         $page->see('Foto de perfil atualizada com sucesso!');
         $src = $page->grabAttributeFrom('#profile_avatar', 'src');
-        Assert::assertStringContainsString('/assets/uploads/users/', $src);
+        // Ex: /assets/uploads/test/users/2/avatar_<hash>.jpg (os testes usam a pasta de uploads de teste)
+        Assert::assertMatchesRegularExpression('#/assets/uploads/(test/)?users/\d+/avatar_[a-f0-9]{32}\.jpg$#', $src);
         Assert::assertFileExists($this->filesystemPath($src));
 
         // O avatar aparece também na navbar e na Área do Aluno

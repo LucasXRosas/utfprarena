@@ -2,38 +2,11 @@
 
 namespace Tests\Acceptance\Auth;
 
-use App\Models\User;
 use Tests\Acceptance\BaseAcceptanceCest;
 use Tests\Support\AcceptanceTester;
 
 class AuthCest extends BaseAcceptanceCest
 {
-    public function _before(AcceptanceTester $page): void
-    {
-        parent::_before($page);
-
-        // Prepara usuários para os testes de aceitação
-        $admin = new User([
-            'name' => 'Administrador Arena',
-            'email' => 'admin@arena.com',
-            'password' => 'admin123',
-            'password_confirmation' => 'admin123',
-            'role' => User::ROLE_MANAGER,
-            'status' => User::STATUS_ACTIVE
-        ]);
-        $admin->save();
-
-        $aluno = new User([
-            'name' => 'Aluno Beach Tennis',
-            'email' => 'aluno@arena.com',
-            'password' => 'aluno123',
-            'password_confirmation' => 'aluno123',
-            'role' => User::ROLE_STUDENT,
-            'status' => User::STATUS_ACTIVE
-        ]);
-        $aluno->save();
-    }
-
     // 1.1 Tentativa de acesso à área restrita sem autenticação
     public function tentativaDeAcessoAreaRestritaSemAutenticacao(AcceptanceTester $page): void
     {
