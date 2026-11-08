@@ -126,8 +126,32 @@ class CourtGalleryControllersTest extends ControllerTestCase
             'court_id' => $this->court->id,
         ]);
 
-        $this->assertStringContainsString('Location: /admin/courts/' . $this->court->id, $response);
-        $this->assertStringContainsString('Nenhum arquivo foi enviado', $_SESSION['flash']['danger'] ?? '');
+        // Não redireciona: o erro aparece embaixo do campo de arquivo
+        $this->assertStringNotContainsString('Location:', $response);
+        $this->assertStringContainsString('id="error_image">Nenhum arquivo foi enviado.', $response);
+        $this->assertStringContainsString('id="court_image_form" novalidate', $response);
+    }
+
+    public function test_upload_error_keeps_typed_caption(): void
+    {
+        $response = $this->post('create', 'App\Controllers\Admin\CourtImagesController', [
+            'court_id' => $this->court->id,
+            'caption' => 'Legenda digitada',
+        ], ['image' => UploadFixtures::phpScript('foto.php.jpg')]);
+
+        $this->assertMatchesRegularExpression('/id="error_image">Arquivo malicioso/', $response);
+        $this->assertStringContainsString('value="Legenda digitada"', $response);
+    }
+
+    public function test_admin_create_court_with_empty_name_shows_field_error(): void
+    {
+        $response = $this->post('create', 'App\Controllers\Admin\CourtsController', [
+            'court' => ['name' => '   ', 'status' => Court::STATUS_AVAILABLE],
+        ]);
+
+        $this->assertStringNotContainsString('Location:', $response);
+        $this->assertStringContainsString('id="new_court_form" novalidate', $response);
+        $this->assertMatchesRegularExpression('/id="error_court_name">\s*O nome da quadra não pode ser vazio!/', $response);
     }
 
     public function test_destroy_image_removes_file_and_record(): void

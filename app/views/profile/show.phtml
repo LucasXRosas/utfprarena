@@ -18,7 +18,7 @@
             <div class="card-body text-center">
                 <img src="<?= htmlspecialchars($avatar->path()) ?>"
                      alt="Foto de perfil de <?= htmlspecialchars($user->name) ?>"
-                     class="avatar-xl rounded-circle border border-3 border-warning shadow-sm mb-3"
+                     class="avatar-xl rounded-circle border border-3 border-warning shadow-sm mb-3" width="180" height="180"
                      id="profile_avatar">
                 <h5 class="fw-bold mb-1" id="profile_name"><?= htmlspecialchars($user->name) ?></h5>
                 <p class="text-muted small mb-2"><?= htmlspecialchars($user->email) ?></p>
@@ -58,11 +58,16 @@
             </div>
             <div class="card-body">
                 <!-- enctype multipart/form-data é obrigatório para que o navegador envie o binário do arquivo -->
-                <form action="/profile/avatar" method="POST" enctype="multipart/form-data" id="avatar_form">
+<?php $avatarError = $avatarError ?? null; ?>
+                <!-- novalidate: sem os balões do navegador; a validação do arquivo é feita no backend (ImageValidator) -->
+                <form action="/profile/avatar" method="POST" enctype="multipart/form-data" id="avatar_form" novalidate>
                     <div class="mb-3">
                         <label for="avatar_file" class="form-label fw-semibold">Arquivo de imagem</label>
-                        <input type="file" class="form-control" id="avatar_file" name="avatar"
-                               accept="<?= htmlspecialchars($validator->acceptAttribute()) ?>" required>
+                        <input type="file" class="form-control<?= $avatarError !== null ? ' is-invalid' : '' ?>" id="avatar_file"
+                               name="avatar" accept="<?= htmlspecialchars($validator->acceptAttribute()) ?>">
+                        <?php if ($avatarError !== null) : ?>
+                            <div class="invalid-feedback" id="error_avatar"><?= htmlspecialchars($avatarError) ?></div>
+                        <?php endif; ?>
                         <div class="form-text">
                             Formatos aceitos: <strong><?= $validator->allowedLabel() ?></strong> &bull;
                             Tamanho máximo: <strong><?= $validator->maxSizeLabel() ?></strong>.

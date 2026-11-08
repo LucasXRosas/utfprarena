@@ -142,8 +142,8 @@ Deixe uma pasta `~/demo-upload` com:
 ### 1.4 Validação do arquivo (visão rápida, detalhada na Seção 2)
 
 🎬 **AÇÃO**
-1. Em `/admin/courts/1`, tente enviar `documento.pdf` (ou `.gif`). Resultado: **"Erro ao enviar imagem: Formato não permitido. Envie apenas: JPG, JPEG, PNG, WEBP."**
-2. Clique em **Enviar** sem escolher arquivo e, pelo DevTools, remova o atributo `required` do input. Resultado: **"Nenhum arquivo foi enviado."**
+1. Em `/admin/courts/1`, tente enviar `documento.pdf` (ou `.gif`). Resultado: **"Formato não permitido. Envie apenas: JPG, JPEG, PNG, WEBP."**, em vermelho embaixo do campo de arquivo. A legenda digitada continua preenchida.
+2. Clique em **Enviar** sem escolher arquivo. Resultado: **"Nenhum arquivo foi enviado."** embaixo do campo. Repare que **não aparece o balão do navegador**: o formulário usa `novalidate`, então quem valida é sempre o backend.
 
 ### 1.5 Bônus: foto de perfil (ProfileAvatar)
 
@@ -165,12 +165,12 @@ Deixe uma pasta `~/demo-upload` com:
 ## 2. Validações Necessárias no Backend — Peso 1
 
 🗣️ **FALA (introdução)**
-> "Toda validação é feita **no backend**. O atributo `accept` do input e o `required` são só conveniência para o usuário, porque qualquer pessoa consegue removê-los no DevTools ou enviar a requisição pelo cURL. Quem decide é a classe `ImageValidator`."
+> "Toda validação é feita **no backend**. Os formulários usam `novalidate`, ou seja, o navegador não valida nada: validação no navegador é só conveniência, e qualquer pessoa a burla pelo DevTools ou pelo cURL. O atributo `accept` só filtra a janela de seleção de arquivos. Quem decide é a classe `ImageValidator`, e o erro volta em vermelho embaixo do campo, mantendo o que foi digitado."
 
 ### 2.1 Tamanho e formatos aceitos
 
 🎬 **AÇÃO**
-1. Envie `grande.jpg` (3MB). Resultado: **"Erro ao enviar imagem: O arquivo excede o tamanho máximo permitido de 2MB."**
+1. Envie `grande.jpg` (3MB). Resultado: **"O arquivo excede o tamanho máximo permitido de 2MB."** embaixo do campo de arquivo.
 2. Envie `documento.pdf`. Resultado: **"Formato não permitido. Envie apenas: JPG, JPEG, PNG, WEBP."**
 3. (Opcional) Renomeie um `.png` para `.jpg` e envie. Resultado: **"A extensão .jpg não corresponde ao conteúdo do arquivo (image/png)."**
 
@@ -267,7 +267,7 @@ Alternativa: no DevTools, mude o `action` do formulário para `/admin/courts/999
 
 📚 **Referência:** ELMASRI, R.; NAVATHE, S. B. *Sistemas de Banco de Dados*. 7. ed. São Paulo: Pearson, 2018. Cap. 5 (O Modelo de Dados Relacional e as Restrições em Bancos de Dados Relacionais), seção sobre restrições de integridade referencial e chaves estrangeiras.
 
-📁 Mostre `database/schema.sql`, linhas 49–65.
+📁 Mostre `database/schema.sql`, linhas 46–64.
 
 ### 5.2 Integridade Referencial
 
@@ -319,7 +319,7 @@ DROP TABLE demo_filho; DROP TABLE demo_pai;
 
 🎬 Mostre no DevTools → aba **Network** → requisição `POST /admin/courts/1/images` → **Payload / Request Headers** com `Content-Type: multipart/form-data; boundary=----WebKitFormBoundary...`.
 
-📁 Mostre `app/views/admin/courts/show.phtml`, linha 26 (`enctype="multipart/form-data"`).
+📁 Mostre `app/views/admin/courts/show.phtml`, linha 31 (`enctype="multipart/form-data"` e `novalidate`).
 
 📚 **Referência:** GOURLEY, D.; TOTTY, B. *HTTP: The Definitive Guide*. Sebastopol: O'Reilly, 2002. Cap. 15 (Entities and Encodings), seção sobre *multipart form submissions*. Norma: RFC 7578 — *Returning Values from Forms: multipart/form-data* (IETF, 2015).
 📚 Complementar (PHP): WELLING, L.; THOMSON, L. *PHP and MySQL Web Development*. 5. ed. Addison-Wesley, 2016. Cap. 17 (Interacting with the File System and the Server), seção "Uploading Files".
@@ -329,7 +329,7 @@ DROP TABLE demo_filho; DROP TABLE demo_pai;
 🗣️ **FALA**
 > "MIME type (*Multipurpose Internet Mail Extensions*) é o rótulo padronizado `tipo/subtipo` que identifica a natureza de um conteúdo: `image/jpeg`, `image/png`, `application/pdf`, `text/x-php`... O servidor usa esse rótulo no `Content-Type` para o navegador saber como exibir. **Ponto crítico de segurança:** o MIME que o navegador manda em `$_FILES['type']` é **declarado pelo cliente** e pode ser forjado. Por isso descartamos esse valor e detectamos o MIME real pelos *magic bytes*: JPEG começa com `FF D8 FF`, PNG com `89 50 4E 47`. Quem faz isso é `finfo` (libmagic)."
 
-📁 Mostre `app/Services/ImageValidator.php`, linhas 111–118 (`new info(FILEINFO_MIME_TYPE)`).
+📁 Mostre `app/Services/ImageValidator.php`, linhas 111–118 (`new \finfo(FILEINFO_MIME_TYPE)`).
 
 📚 **Referência:** GOURLEY; TOTTY, 2002, Cap. 3 (HTTP Messages) e Cap. 15 (Entities and Encodings), seções sobre *Media Types and Charsets* e *Content-Type*. Normas: RFC 2045 e RFC 2046 (MIME, IETF, 1996).
 📚 Segurança: OWASP. *Unrestricted File Upload* / *File Upload Cheat Sheet*. Disponível em: owasp.org.
@@ -366,13 +366,13 @@ MySQL: INSERT INTO court_images (... court_id FK → courts.id)
 
 📁 **Siga este caminho no VS Code:**
 
-1. **`config/routes.php`** (linhas 52–62): rotas dentro de `Route::middleware('auth')` → `Route::middleware('admin')`. Destaque o recurso aninhado:
+1. **`config/routes.php`** (linhas 51–61): rotas dentro de `Route::middleware('auth')` → `Route::middleware('admin')`. Destaque o recurso aninhado:
    ```php
    Route::post('/admin/courts/{court_id}/images', [AdminCourtImagesController::class, 'create'])
    ```
    > "O `{court_id}` na URL deixa explícito que a imagem pertence a uma quadra, que é o lado 1 da relação."
 
-2. **`app/views/admin/courts/show.phtml`** (linhas 25–49): form com `method="POST"`, `enctype="multipart/form-data"`, `<input type="file" name="image" accept="image/jpeg,image/png,image/webp">` e o campo `caption`.
+2. **`app/views/admin/courts/show.phtml`** (linhas 25–59): form com `method="POST"`, `enctype="multipart/form-data"` e `novalidate`, `<input type="file" name="image" accept="image/jpeg,image/png,image/webp">` e o campo `caption`. Quando há erro, o input recebe a classe `is-invalid` e a mensagem aparece logo abaixo (`#error_image`).
 
 3. **`core/Http/Request.php`** (linhas 20–59): o framework **não** expunha `$_FILES`. Adicionamos:
    - `$this->files = $_FILES` no construtor;
@@ -383,7 +383,8 @@ MySQL: INSERT INTO court_images (... court_id FK → courts.id)
    - busca a quadra com `Court::findById($court_id)` e, se não existir, mostra *"Galeria inexistente"*;
    - `$gallery = $court->gallery();`
    - `$gallery->add($request->getFile('image'), $caption)`;
-   - mostra a mensagem de sucesso com a URL ou a de erro com `firstError()`, escapada com `htmlspecialchars`.
+   - sucesso: mensagem com a URL do arquivo e redirecionamento (padrão PRG);
+   - erro: **renderiza a galeria de novo** com status 422, a mensagem de `firstError()` embaixo do campo de arquivo e a legenda preservada.
 
 5. **`app/Services/CourtGallery.php`**, método `add()` (linha 55), o coração do registro:
    - (a) confere se a quadra existe com `Court::exists(['id' => ...])`;
@@ -397,13 +398,13 @@ MySQL: INSERT INTO court_images (... court_id FK → courts.id)
 6. **`app/Services/FileStorage.php`**, método `store()` (linha 31): cria a pasta com `mkdir(..., 0775, true)`, aplica `basename()` no nome (bloqueia `../../`) e chama `moveUploadedFile()` → `move_uploaded_file()`.
    > "`move_uploaded_file` só move arquivos que **realmente chegaram por HTTP POST**, então ninguém consegue usar esse fluxo para mover um arquivo qualquer do servidor."
 
-7. **`app/Models/CourtImage.php`**: `$columns` (linha 29), `validates()` (linha 50) com `notEmpty` + `Validations::foreignKeyExists('court_id', $this, Court::class)`.
+7. **`app/Models/CourtImage.php`**: `$columns` (linha 28), `validates()` (linha 50) com `notEmpty` + `Validations::foreignKeyExists('court_id', $this, Court::class)`.
 
-8. **`lib/Validations.php`**, `foreignKeyExists()` (linha 34): nova validação genérica de integridade referencial na camada de aplicação.
+8. **`lib/Validations.php`**, `foreignKeyExists()` (linha 120): nova validação genérica de integridade referencial na camada de aplicação.
 
 #### 6.1.2 Visualização da imagem
 
-1. **`app/Controllers/Admin/CourtsController.php`** `show()` (linha 65) e **`app/Controllers/CourtsController.php`** `show()` (linha 18): carregam `$court->gallery()->images()`.
+1. **`app/Controllers/Admin/CourtsController.php`** `show()` (linha 67) e **`app/Controllers/CourtsController.php`** `show()` (linha 18): carregam `$court->gallery()->images()`.
 2. **`app/Services/CourtGallery.php`** `images()` (linha 39) → `$this->court->images()->get()` → **HasMany::get()** → `CourtImage::where(['court_id' => $id])`.
 3. **`app/Models/CourtImage.php`** `relativePath()` (linha 69) monta `courts/{court_id}/{file_name}` e `url()` (linha 74) devolve `/assets/uploads/courts/...`.
 4. **`core/Constants/Constants.php`**: os novos `uploadsPath()` (caminho físico) e `uploadsUrl()` (URL pública). Em `APP_ENV=testing` eles usam a subpasta `uploads/test`, para que os testes não misturem arquivos com os de desenvolvimento.
@@ -413,14 +414,14 @@ MySQL: INSERT INTO court_images (... court_id FK → courts.id)
 #### 6.1.3 Remoção da imagem
 
 1. **`config/routes.php`**: `Route::delete('/admin/courts/{court_id}/images/{id}', ...)`. O form usa `<input type="hidden" name="_method" value="DELETE">`, que é o *method spoofing* já suportado pelo `Request` do framework.
-2. **`app/Controllers/Admin/CourtImagesController.php`** `destroy()` (linha 51):
+2. **`app/Controllers/Admin/CourtImagesController.php`** `destroy()` (linha 61):
    ```php
    $image = $court->images()->findById((int) $imageId);
    ```
    > "Usamos o `findById` do **HasMany**, que filtra por `court_id` **e** `id`. Assim não dá para apagar a imagem de outra quadra trocando o ID na URL."
 3. **`app/Services/CourtGallery.php`** `remove()` (linha 105): confere se a imagem pertence à galeria, depois `FileStorage::delete()` (`unlink`) e `$image->destroy()` (DELETE no banco).
-4. **Cascata:** `app/Models/Court.php` `destroy()` (linha 149) chama `parent::destroy()` (o banco faz o CASCADE) e depois `CourtGallery::destroyFiles()`, que chama `FileStorage::deleteDirectory('courts/{id}')`.
-5. Também para o usuário: `app/Models/User.php` `destroy()` (linha 161) apaga a pasta `uploads/users/{id}` quando o atleta é excluído pelo CRUD.
+4. **Cascata:** `app/Models/Court.php` `destroy()` (linha 150) chama `parent::destroy()` (o banco faz o CASCADE) e depois `CourtGallery::destroyFiles()`, que chama `FileStorage::deleteDirectory('courts/{id}')`.
+5. Também para o usuário: `app/Models/User.php` `destroy()` (linha 207) apaga a pasta `uploads/users/{id}` quando o atleta é excluído pelo CRUD.
 
 #### 6.1.4 Validação da imagem
 
@@ -471,7 +472,7 @@ public function court(): BelongsTo
 > - `findById($id)` (linha 34): busca **dentro da relação** (`court_id` + `id`). Usamos no `destroy` do controller por segurança;
 > - `paginate()` (linha 44): pagina os filhos. Não foi necessário aqui, mas está disponível."
 
-📁 Mostre o uso em `app/Models/Court.php`, linha 119:
+📁 Mostre o uso em `app/Models/Court.php`, linha 120:
 ```php
 public function images(): HasMany
 {
@@ -493,7 +494,7 @@ public function images(): HasMany
 > - `remove()` (linha 103): apaga o arquivo e coloca `avatar_name = NULL`;
 > - `removeAll()` (linha 119): apaga a pasta do usuário e é chamado por `User::destroy()`.
 >
-> No `User` (linha 152) criamos `avatar(): ProfileAvatar`, então a view usa `$user->avatar()->path()`."
+> No `User` (linha 198) criamos `avatar(): ProfileAvatar`, então a view usa `$user->avatar()->path()`."
 
 📁 Mostre o uso em `app/views/layouts/application.phtml` (miniatura na navbar) e em `app/Controllers/ProfileController.php` (`show`, `updateAvatar`, `destroyAvatar`).
 
@@ -501,7 +502,7 @@ public function images(): HasMany
 
 #### 6.4.1 Explicar o banco para esta funcionalidade
 
-📁 Abra `database/schema.sql`, linhas 46–65.
+📁 Abra `database/schema.sql`, linhas 46–64.
 
 ```sql
 CREATE TABLE court_images (
@@ -781,3 +782,68 @@ WHERE CONSTRAINT_SCHEMA = DATABASE();
 - **"Por que validar a FK na aplicação se o banco já valida?"** Para dar uma mensagem amigável ("Galeria inexistente") em vez de uma exceção SQL, e para não gravar o arquivo no disco à toa. O banco continua sendo a última linha de defesa.
 - **"Como vocês testam upload se `move_uploaded_file` só funciona com HTTP?"** Nos unitários, o `TestFileStorage` substitui só esse método. Nos testes de aceitação, o upload é real, feito pelo navegador via Selenium.
 - **"Por que o nome do arquivo é aleatório?"** Evita colisão, sobrescrita, *path traversal* e enumeração de arquivos, e impede que caracteres do nome original causem problemas.
+
+---
+
+## Referências
+
+Referências bibliográficas usadas na explicação dos conceitos (Seção 5) e do framework (Seção 6), em formato ABNT, com os capítulos consultados.
+
+### Livros
+
+1. **ELMASRI, Ramez; NAVATHE, Shamkant B.** *Sistemas de Banco de Dados*. 7. ed. São Paulo: Pearson Education do Brasil, 2018.
+   - **Cap. 5:** O Modelo de Dados Relacional e as Restrições em Bancos de Dados Relacionais. Seções sobre chave primária, **chave estrangeira** e **restrição de integridade referencial**.
+   - **Cap. 6:** SQL Básica. Seção "Especificando restrições de chave e de integridade referencial", com as ações referenciais `ON DELETE`/`ON UPDATE`: `CASCADE`, `SET NULL`, `SET DEFAULT` e `RESTRICT`/`NO ACTION`.
+   - *Usado em:* 5.1 Chave Estrangeira e 5.3 Cascade Delete, SET NULL e RESTRICT.
+
+2. **SILBERSCHATZ, Abraham; KORTH, Henry F.; SUDARSHAN, S.** *Sistema de Banco de Dados*. 7. ed. Rio de Janeiro: GEN LTC, 2020.
+   - **Cap. 4:** SQL Intermediária. Seção "Restrições de integridade", subseção "Integridade referencial" (definição e ações em cascata).
+   - *Usado em:* 5.2 Integridade Referencial.
+
+3. **DATE, C. J.** *Introdução a Sistemas de Bancos de Dados*. 8. ed. Rio de Janeiro: Elsevier/Campus, 2004.
+   - **Cap. 9:** Integridade. Restrições de integridade, chaves candidatas e **chaves estrangeiras**, e regras referenciais.
+   - *Usado em:* 5.2 Integridade Referencial (complementar).
+
+4. **GOURLEY, David; TOTTY, Brian et al.** *HTTP: The Definitive Guide*. Sebastopol: O'Reilly Media, 2002.
+   - **Cap. 3:** HTTP Messages. Estrutura das mensagens, cabeçalhos e o cabeçalho `Content-Type`.
+   - **Cap. 15:** Entities and Encodings. **Media types (MIME types)**, `Content-Type`, `Content-Length` e **multipart form submissions** (`multipart/form-data` e *boundary*).
+   - *Usado em:* 5.4 multipart/form-data e 5.5 MIME Type.
+
+5. **WELLING, Luke; THOMSON, Laura.** *PHP and MySQL Web Development*. 5. ed. Boston: Addison-Wesley, 2016.
+   - **Cap. 17:** Interacting with the File System and the Server. Seção "Uploading Files": formulário com `enctype="multipart/form-data"`, superglobal `$_FILES`, `move_uploaded_file()` e cuidados de segurança.
+   - *Usado em:* 5.4 multipart/form-data (implementação em PHP) e 6.1 Fluxo de registro da imagem.
+
+6. **FOWLER, Martin.** *Padrões de Arquitetura de Aplicações Corporativas*. Porto Alegre: Bookman, 2006.
+   - **Cap. 10:** Padrões de Arquitetura de Fontes de Dados. Padrão **Active Record**, base dos models do framework (`Core\Database\ActiveRecord\Model`).
+   - **Cap. 12:** Padrões Estruturais Objeto-Relacionais. Padrão **Foreign Key Mapping** (mapeamento de chave estrangeira), base das classes `BelongsTo` e `HasMany`.
+   - *Usado em:* 6.3 Explicação do Funcionamento do Framework.
+
+### Normas técnicas (IETF)
+
+7. **FREED, N.; BORENSTEIN, N.** *RFC 2045: Multipurpose Internet Mail Extensions (MIME) Part One: Format of Internet Message Bodies*. IETF, 1996. Disponível em: https://www.rfc-editor.org/rfc/rfc2045.
+   - Define o cabeçalho `Content-Type` e o formato `tipo/subtipo`. *Usado em:* 5.5 MIME Type.
+
+8. **FREED, N.; BORENSTEIN, N.** *RFC 2046: Multipurpose Internet Mail Extensions (MIME) Part Two: Media Types*. IETF, 1996. Disponível em: https://www.rfc-editor.org/rfc/rfc2046.
+   - Define os tipos de mídia (`image`, `text`, `application`…) e o tipo **multipart** com *boundary*. *Usado em:* 5.4 e 5.5.
+
+9. **MASINTER, L.** *RFC 7578: Returning Values from Forms: multipart/form-data*. IETF, 2015. Disponível em: https://www.rfc-editor.org/rfc/rfc7578.
+   - Especificação atual do `multipart/form-data` (partes, `Content-Disposition`, `filename`). *Usado em:* 5.4 multipart/form-data.
+
+### Segurança
+
+10. **OWASP FOUNDATION.** *File Upload Cheat Sheet*. OWASP Cheat Sheet Series. Disponível em: https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html.
+    - Validação de extensão e de tipo de conteúdo, renomeação de arquivos, limite de tamanho e armazenamento fora da área executável. *Usado em:* 2.2 Tratamento de upload malicioso e 5.5 MIME Type.
+
+11. **OWASP FOUNDATION.** *Unrestricted File Upload*. OWASP Community. Disponível em: https://owasp.org/www-community/vulnerabilities/Unrestricted_File_Upload.
+    - Riscos de upload sem restrição (execução de scripts, dupla extensão, falsificação de `Content-Type`). *Usado em:* 2.2 Tratamento de upload malicioso.
+
+### Mapa rápido: conceito → referência
+
+| Conceito (rubrica) | Referência principal | Complementar |
+|---|---|---|
+| Chave Estrangeira (FK) | Elmasri; Navathe (2018), Cap. 5 | Date (2004), Cap. 9 |
+| Integridade Referencial | Silberschatz; Korth; Sudarshan (2020), Cap. 4 | Date (2004), Cap. 9; Elmasri; Navathe (2018), Cap. 5 |
+| Cascade Delete, SET NULL e RESTRICT | Elmasri; Navathe (2018), Cap. 6 | Silberschatz et al. (2020), Cap. 4 |
+| multipart/form-data (enctype) | Gourley; Totty (2002), Cap. 15 | RFC 7578; Welling; Thomson (2016), Cap. 17 |
+| MIME Type | Gourley; Totty (2002), Caps. 3 e 15 | RFC 2045; RFC 2046; OWASP |
+| Active Record, BelongsTo e HasMany | Fowler (2006), Caps. 10 e 12 | — |
