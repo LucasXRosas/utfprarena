@@ -30,11 +30,21 @@ class CourtImagesController extends Controller
 
         $gallery = $court->gallery();
         $caption = $request->getParam('caption');
-        $image = $gallery->add($request->getFile('image'), is_string($caption) ? $caption : null);
+        $caption = is_string($caption) ? $caption : '';
+        $image = $gallery->add($request->getFile('image'), $caption);
 
         if ($image === null) {
-            FlashMessage::danger('Erro ao enviar imagem: ' . (string) $gallery->firstError());
-            $this->redirectTo(route('admin.courts.show', ['id' => $court->id]));
+            // Renderiza a galeria de novo com o erro embaixo do campo de arquivo e a legenda preservada
+            http_response_code(422);
+            $title = 'Galeria da Quadra: ' . $court->name;
+            $images = $gallery->images();
+            $validator = $gallery->validator();
+            $uploadError = (string) $gallery->firstError();
+
+            $this->render(
+                'admin/courts/show',
+                compact('title', 'court', 'gallery', 'images', 'validator', 'uploadError', 'caption')
+            );
             return;
         }
 

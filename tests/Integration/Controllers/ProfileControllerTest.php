@@ -60,8 +60,10 @@ class ProfileControllerTest extends ControllerTestCase
         $tmp = UploadFixtures::phpScript('avatar.php');
         $response = $this->post('updateAvatar', 'App\Controllers\ProfileController', [], ['avatar' => $tmp]);
 
-        $this->assertStringContainsString('Location: /profile', $response);
-        $this->assertStringContainsString('Arquivo malicioso', $_SESSION['flash']['danger'] ?? '');
+        // Não redireciona: o erro aparece embaixo do campo de arquivo
+        $this->assertStringNotContainsString('Location:', $response);
+        $this->assertMatchesRegularExpression('/id="error_avatar">Arquivo malicioso/', $response);
+        $this->assertStringContainsString('id="avatar_form" novalidate', $response);
         $this->assertNull(User::findById($this->student->id)?->avatar_name);
     }
 

@@ -50,7 +50,33 @@ class AuthCest extends BaseAcceptanceCest
         $page->fillField('user[password]', 'senhaerrada');
         $page->click('#login_submit');
         $page->seeInCurrentUrl('/login');
-        $page->see('Email ou senha inválidos');
+        $page->see('E-mail ou senha inválidos.');
+        $page->seeInField('user[email]', 'inexistente@arena.com');
+    }
+
+    // 1.2 Campos vazios: mensagens personalizadas embaixo dos campos (sem balões do navegador)
+    public function tentativaDeAutenticacaoComCamposVazios(AcceptanceTester $page): void
+    {
+        $page->amOnPage('/login');
+        $page->click('#login_submit'); // novalidate: o navegador não bloqueia o envio
+
+        $page->seeInCurrentUrl('/login');
+        $page->see('Informe o seu e-mail.', '#error_user_email');
+        $page->see('Informe a sua senha.', '#error_user_password');
+        $page->seeElement('#user_email.is-invalid');
+    }
+
+    // 1.2 E-mail em formato inválido
+    public function tentativaDeAutenticacaoComEmailInvalido(AcceptanceTester $page): void
+    {
+        $page->amOnPage('/login');
+        $page->fillField('user[email]', 'aluno-sem-arroba');
+        $page->fillField('user[password]', 'aluno123');
+        $page->click('#login_submit');
+
+        $page->see('Informe um e-mail válido', '#error_user_email');
+        $page->seeInField('user[email]', 'aluno-sem-arroba');
+        $page->dontSeeElement('#error_user_password');
     }
 
     // 1.3 Autenticação bem-sucedida (Administrador)

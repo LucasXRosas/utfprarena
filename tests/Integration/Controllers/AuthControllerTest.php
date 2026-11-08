@@ -65,11 +65,35 @@ class AuthControllerTest extends ControllerTestCase
             params: []
         );
 
-        $this->assertMatchesRegularExpression('/Location: \/login/', $response);
-        $this->assertEquals(
-            'Parâmetros obrigatórios ausentes: informe email e senha.',
-            $_SESSION['flash']['danger'] ?? null
+        // Não redireciona: renderiza o login com a mensagem embaixo de cada campo
+        $this->assertStringNotContainsString('Location:', $response);
+        $this->assertStringContainsString('id="error_user_email">Informe o seu e-mail.', $response);
+        $this->assertStringContainsString('id="error_user_password">Informe a sua senha.', $response);
+        $this->assertFalse(Auth::check());
+    }
+
+    public function test_login_form_disables_browser_validation(): void
+    {
+        $response = $this->get(
+            action: 'new',
+            controllerName: 'App\Controllers\AuthController'
         );
+
+        $this->assertStringContainsString('id="login_form" novalidate', $response);
+        $this->assertStringNotContainsString('required', $response);
+    }
+
+    public function test_create_fails_with_invalid_email_format_and_keeps_typed_value(): void
+    {
+        $response = $this->post(
+            action: 'create',
+            controllerName: 'App\Controllers\AuthController',
+            params: ['user' => ['email' => 'aluno-sem-arroba', 'password' => 'secret123']]
+        );
+
+        $this->assertStringContainsString('id="error_user_email">Informe um e-mail válido', $response);
+        $this->assertStringContainsString('value="aluno-sem-arroba"', $response);
+        $this->assertStringNotContainsString('id="error_user_password"', $response);
     }
 
     public function test_create_fails_when_parameters_are_empty(): void
@@ -86,11 +110,10 @@ class AuthControllerTest extends ControllerTestCase
             ]
         );
 
-        $this->assertMatchesRegularExpression('/Location: \/login/', $response);
-        $this->assertEquals(
-            'Email e senha são obrigatórios.',
-            $_SESSION['flash']['danger'] ?? null
-        );
+        // Espaços em branco no e-mail contam como vazio
+        $this->assertStringNotContainsString('Location:', $response);
+        $this->assertStringContainsString('id="error_user_email">Informe o seu e-mail.', $response);
+        $this->assertStringContainsString('id="error_user_password">Informe a sua senha.', $response);
     }
 
     public function test_create_fails_with_invalid_credentials(): void
@@ -106,11 +129,12 @@ class AuthControllerTest extends ControllerTestCase
             ]
         );
 
-        $this->assertMatchesRegularExpression('/Location: \/login/', $response);
-        $this->assertEquals(
-            'Email ou senha inválidos',
-            $_SESSION['flash']['danger'] ?? null
-        );
+        // Mensagem genérica (não revela se o e-mail existe) e os dois campos destacados
+        $this->assertStringNotContainsString('Location:', $response);
+        $this->assertStringContainsString('E-mail ou senha inválidos.', $response);
+        $this->assertStringContainsString('value="admin.ctrl@arena.com"', $response);
+        $this->assertStringContainsString('class="form-control is-invalid"', $response);
+        $this->assertFalse(Auth::check());
     }
 
     public function test_create_fails_when_user_is_blocked(): void
@@ -126,11 +150,9 @@ class AuthControllerTest extends ControllerTestCase
             ]
         );
 
-        $this->assertMatchesRegularExpression('/Location: \/login/', $response);
-        $this->assertMatchesRegularExpression(
-            '/Acesso bloqueado: usuário possui pendências financeiras/',
-            $_SESSION['flash']['danger'] ?? ''
-        );
+        $this->assertStringNotContainsString('Location:', $response);
+        $this->assertStringContainsString('Acesso bloqueado: usuário possui pendências financeiras', $response);
+        $this->assertFalse(Auth::check());
     }
 
     public function test_create_succeeds_and_redirects_admin_to_admin_index(): void

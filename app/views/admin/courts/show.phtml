@@ -23,19 +23,29 @@
     </div>
     <div class="card-body">
         <!-- enctype multipart/form-data: o corpo da requisição é dividido em partes, uma delas com o binário da imagem -->
-        <form action="/admin/courts/<?= $court->id ?>/images" method="POST" enctype="multipart/form-data" id="court_image_form">
-            <div class="row g-3 align-items-end">
+<?php
+        $uploadError = $uploadError ?? null;
+        $caption = $caption ?? '';
+        ?>
+        <!-- novalidate: sem os balões do navegador; a validação do arquivo é feita no backend (ImageValidator) -->
+        <form action="/admin/courts/<?= $court->id ?>/images" method="POST" enctype="multipart/form-data"
+              id="court_image_form" novalidate>
+            <div class="row g-3 align-items-start">
                 <div class="col-md-5">
                     <label for="court_image_file" class="form-label fw-semibold">Arquivo de imagem <span class="text-danger">*</span></label>
-                    <input type="file" class="form-control" id="court_image_file" name="image"
-                           accept="<?= htmlspecialchars($validator->acceptAttribute()) ?>" required>
+                    <input type="file" class="form-control<?= $uploadError !== null ? ' is-invalid' : '' ?>" id="court_image_file"
+                           name="image" accept="<?= htmlspecialchars($validator->acceptAttribute()) ?>">
+                    <?php if ($uploadError !== null) : ?>
+                        <div class="invalid-feedback" id="error_image"><?= htmlspecialchars($uploadError) ?></div>
+                    <?php endif; ?>
                 </div>
                 <div class="col-md-5">
                     <label for="court_image_caption" class="form-label fw-semibold">Legenda (opcional)</label>
                     <input type="text" class="form-control" id="court_image_caption" name="caption" maxlength="255"
-                           placeholder="Ex: Vista lateral da quadra">
+                           value="<?= htmlspecialchars($caption) ?>" placeholder="Ex: Vista lateral da quadra">
                 </div>
                 <div class="col-md-2 d-grid">
+                    <label class="form-label d-none d-md-block">&nbsp;</label>
                     <button type="submit" class="btn btn-warning fw-semibold" id="btn_upload_image">
                         <i class="bi bi-upload"></i> Enviar
                     </button>

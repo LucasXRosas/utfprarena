@@ -43,8 +43,13 @@ class ProfileController extends Controller
         $avatar = $user->avatar();
 
         if (!$avatar->update($request->getFile('avatar'))) {
-            FlashMessage::danger('Erro ao enviar foto: ' . (string) $avatar->firstError());
-            $this->redirectTo(route('profile.show'));
+            // Renderiza o perfil de novo com o erro embaixo do campo de arquivo
+            http_response_code(422);
+            $title = 'Meu Perfil - UTFPR Arena';
+            $validator = $avatar->validator();
+            $avatarError = (string) $avatar->firstError();
+
+            $this->render('profile/show', compact('title', 'user', 'avatar', 'validator', 'avatarError'));
             return;
         }
 
