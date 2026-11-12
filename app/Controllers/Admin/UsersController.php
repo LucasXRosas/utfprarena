@@ -272,6 +272,7 @@ class UsersController extends Controller
 
         return [
             'name' => $text('name'),
+            'nickname' => $text('nickname'),
             'email' => $email !== null ? mb_strtolower($email) : null,
             'phone' => $text('phone'),
             'cpf' => $text('cpf'),

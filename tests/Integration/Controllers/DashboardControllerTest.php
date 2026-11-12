@@ -17,6 +17,7 @@ class DashboardControllerTest extends ControllerTestCase
 
         $this->student = new User([
             'name' => 'Aluno Dashboard Test',
+            'nickname' => 'Aluno',
             'email' => 'aluno.dash@arena.com',
             'password' => 'secret123',
             'password_confirmation' => 'secret123',

@@ -16,6 +16,7 @@ class UserTest extends TestCase
 
         $this->user = new User([
             'name' => 'User 1',
+            'nickname' => 'User',
             'email' => 'fulano@example.com',
             'password' => '123456',
             'password_confirmation' => '123456',
@@ -26,6 +27,7 @@ class UserTest extends TestCase
 
         $this->user2 = new User([
             'name' => 'User 2',
+            'nickname' => 'User',
             'email' => 'fulano1@example.com',
             'password' => '123456',
             'password_confirmation' => '123456',
@@ -86,6 +88,7 @@ class UserTest extends TestCase
         $this->assertTrue($user->hasErrors());
 
         $this->assertEquals('não pode ser vazio!', $user->errors('name'));
+        $this->assertEquals('não pode ser vazio!', $user->errors('nickname'));
         $this->assertEquals('não pode ser vazio!', $user->errors('email'));
     }
 
@@ -267,5 +270,88 @@ class UserTest extends TestCase
         $invoices = $this->user->invoices();
         $this->assertInstanceOf(\Core\Database\ActiveRecord\HasMany::class, $invoices);
         $this->assertEmpty($this->user->getInvoices());
+    }
+
+    /* ---------------- Apelido (nickname) ---------------- */
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function nicknameUserParams(mixed $nickname): array
+    {
+        return [
+            'name' => 'Atleta Apelido',
+            'nickname' => $nickname,
+            'email' => 'apelido@example.com',
+            'password' => '123456',
+            'password_confirmation' => '123456',
+        ];
+    }
+
+    public function test_valid_nickname_is_persisted_with_active_record(): void
+    {
+        $user = new User($this->nicknameUserParams('Lukinha'));
+
+        $this->assertTrue($user->save());
+        $this->assertFalse($user->hasErrors());
+
+        // Recarrega do banco para garantir que a coluna foi gravada
+        $persisted = User::findById((int) $user->id);
+        $this->assertNotNull($persisted);
+        $this->assertEquals('Lukinha', $persisted->nickname);
+    }
+
+    public function test_nickname_can_be_updated_and_persisted(): void
+    {
+        $this->user->nickname = 'Novo Apelido';
+        $this->assertTrue($this->user->save());
+
+        $this->assertEquals('Novo Apelido', User::findById((int) $this->user->id)?->nickname);
+    }
+
+    public function test_null_nickname_is_rejected(): void
+    {
+        $user = new User($this->nicknameUserParams(null));
+
+        $this->assertFalse($user->isValid());
+        $this->assertFalse($user->save());
+        $this->assertEquals('não pode ser vazio!', $user->errors('nickname'));
+        $this->assertNull(User::findByEmail('apelido@example.com'));
+    }
+
+    public function test_empty_nickname_is_rejected(): void
+    {
+        $user = new User($this->nicknameUserParams(''));
+
+        $this->assertFalse($user->isValid());
+        $this->assertFalse($user->save());
+        $this->assertEquals('não pode ser vazio!', $user->errors('nickname'));
+        $this->assertNull(User::findByEmail('apelido@example.com'));
+    }
+
+    public function test_blank_nickname_with_only_spaces_is_rejected(): void
+    {
+        $user = new User($this->nicknameUserParams('   '));
+
+        $this->assertFalse($user->save());
+        $this->assertEquals('não pode ser vazio!', $user->errors('nickname'));
+    }
+
+    public function test_existing_user_cannot_have_nickname_cleared(): void
+    {
+        $this->user->nickname = '';
+        $this->assertFalse($this->user->save());
+        $this->assertEquals('não pode ser vazio!', $this->user->errors('nickname'));
+
+        // O valor gravado no banco continua o original
+        $this->assertEquals('User', User::findById((int) $this->user->id)?->nickname);
+    }
+
+    public function test_nickname_respects_max_length(): void
+    {
+        $user = new User($this->nicknameUserParams(str_repeat('a', User::NICKNAME_MAX_LENGTH + 1)));
+
+        $this->assertFalse($user->isValid());
+        $this->assertNotNull($user->errors('nickname'));
     }
 }

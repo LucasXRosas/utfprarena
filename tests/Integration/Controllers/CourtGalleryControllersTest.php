@@ -23,6 +23,7 @@ class CourtGalleryControllersTest extends ControllerTestCase
 
         $admin = new User([
             'name' => 'Admin Galeria',
+            'nickname' => 'Admin',
             'email' => 'admin.galeria@arena.com',
             'password' => 'secret123',
             'password_confirmation' => 'secret123',

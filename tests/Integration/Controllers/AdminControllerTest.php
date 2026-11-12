@@ -17,6 +17,7 @@ class AdminControllerTest extends ControllerTestCase
 
         $this->admin = new User([
             'name' => 'Admin Test',
+            'nickname' => 'Admin',
             'email' => 'admin.panel@arena.com',
             'password' => 'secret123',
             'password_confirmation' => 'secret123',
@@ -27,6 +28,7 @@ class AdminControllerTest extends ControllerTestCase
 
         $this->student = new User([
             'name' => 'Student Test',
+            'nickname' => 'Student',
             'email' => 'student.panel@arena.com',
             'password' => 'secret123',
             'password_confirmation' => 'secret123',
@@ -76,6 +78,7 @@ class AdminControllerTest extends ControllerTestCase
         $this->assertStringNotContainsString('Location:', $response);
         $this->assertStringContainsString('Corrija os campos destacados', $response);
         $this->assertMatchesRegularExpression('/id="error_user_name">Não pode ser vazio!/', $response);
+        $this->assertMatchesRegularExpression('/id="error_user_nickname">Não pode ser vazio!/', $response);
         $this->assertMatchesRegularExpression('/id="error_user_email">Não pode ser vazio!/', $response);
         $this->assertMatchesRegularExpression('/id="error_user_password">Não pode ser vazio!/', $response);
         $this->assertStringContainsString('class="form-control is-invalid" id="user_name"', $response);
@@ -89,6 +92,7 @@ class AdminControllerTest extends ControllerTestCase
             params: [
                 'user' => [
                     'name' => 'Atleta Digitado',
+                    'nickname' => 'Atleta',
                     'email' => 'email-invalido',
                     'cpf' => '12345678900',
                     'password' => '123',
@@ -112,6 +116,7 @@ class AdminControllerTest extends ControllerTestCase
             params: [
                 'user' => [
                     'name' => 'Papel Forjado',
+                    'nickname' => 'Papel',
                     'email' => 'forjado@arena.com',
                     'role' => 'superadmin',
                     'password' => '123456',
@@ -132,6 +137,7 @@ class AdminControllerTest extends ControllerTestCase
             params: [
                 'user' => [
                     'name' => 'Novo Atleta',
+                    'nickname' => 'Novo',
                     'email' => 'novo@arena.com',
                     'password' => '123456',
                     'password_confirmation' => '654321'
@@ -155,6 +161,7 @@ class AdminControllerTest extends ControllerTestCase
             params: [
                 'user' => [
                     'name' => 'Atleta Cadastrado',
+                    'nickname' => 'Atleta',
                     'email' => 'atleta.cadastrado@arena.com',
                     'password' => '123456',
                     'password_confirmation' => '123456',
@@ -170,7 +177,29 @@ class AdminControllerTest extends ControllerTestCase
             '/cadastrado com sucesso!/',
             $_SESSION['flash']['success'] ?? ''
         );
-        $this->assertNotNull(User::findByEmail('atleta.cadastrado@arena.com'));
+        $this->assertEquals('Atleta', User::findByEmail('atleta.cadastrado@arena.com')?->nickname);
+    }
+
+    public function test_create_rejects_empty_nickname(): void
+    {
+        $response = $this->post(
+            action: 'create',
+            controllerName: 'App\Controllers\Admin\UsersController',
+            params: [
+                'user' => [
+                    'name' => 'Sem Apelido',
+                    'nickname' => '   ',
+                    'email' => 'sem.apelido@arena.com',
+                    'password' => '123456',
+                    'password_confirmation' => '123456',
+                ]
+            ]
+        );
+
+        $this->assertStringNotContainsString('Location:', $response);
+        $this->assertMatchesRegularExpression('/id="error_user_nickname">Não pode ser vazio!/', $response);
+        $this->assertStringContainsString('class="form-control is-invalid" id="user_nickname"', $response);
+        $this->assertNull(User::findByEmail('sem.apelido@arena.com'));
     }
 
     public function test_show_renders_user_details(): void
@@ -183,6 +212,7 @@ class AdminControllerTest extends ControllerTestCase
 
         $this->assertMatchesRegularExpression('/Credencial do Atleta/', $response);
         $this->assertMatchesRegularExpression('/Student Test/', $response);
+        $this->assertStringContainsString('id="athlete_nickname">Student<', $response);
     }
 
     public function test_edit_renders_edit_form(): void
@@ -226,6 +256,7 @@ class AdminControllerTest extends ControllerTestCase
                 'id' => $this->student->id,
                 'user' => [
                     'name' => 'Student Test',
+                    'nickname' => 'Student',
                     'email' => $this->student->email,
                     'password' => 'novaSenha1',
                     'password_confirmation' => 'novaSenha1',
@@ -248,6 +279,7 @@ class AdminControllerTest extends ControllerTestCase
                 'id' => $this->student->id,
                 'user' => [
                     'name' => 'Student Test',
+                    'nickname' => 'Student',
                     'email' => $this->student->email,
                     'password' => 'abc',
                     'password_confirmation' => 'xyz',
@@ -286,6 +318,7 @@ class AdminControllerTest extends ControllerTestCase
                 'id' => $this->admin->id,
                 'user' => [
                     'name' => 'Admin Test',
+                    'nickname' => 'Admin',
                     'email' => $this->admin->email,
                     'role' => User::ROLE_STUDENT,
                     'status' => User::STATUS_BLOCKED,
@@ -338,6 +371,7 @@ class AdminControllerTest extends ControllerTestCase
                 'id' => $this->student->id,
                 'user' => [
                     'name' => 'Student Atualizado',
+                    'nickname' => 'Student',
                     'email' => $this->student->email,
                     'status' => User::STATUS_BLOCKED
                 ]
@@ -354,6 +388,36 @@ class AdminControllerTest extends ControllerTestCase
         $this->assertNotNull($updated);
         $this->assertEquals('Student Atualizado', $updated->name);
         $this->assertTrue($updated->isBlocked());
+    }
+
+    public function test_update_persists_new_nickname(): void
+    {
+        $this->put(
+            action: 'update',
+            controllerName: 'App\Controllers\Admin\UsersController',
+            params: [
+                'id' => $this->student->id,
+                'user' => ['name' => 'Student Test', 'nickname' => 'Craque', 'email' => $this->student->email]
+            ]
+        );
+
+        $this->assertEquals('Craque', User::findById((int) $this->student->id)?->nickname);
+    }
+
+    public function test_update_rejects_empty_nickname(): void
+    {
+        $response = $this->put(
+            action: 'update',
+            controllerName: 'App\Controllers\Admin\UsersController',
+            params: [
+                'id' => $this->student->id,
+                'user' => ['name' => 'Student Test', 'nickname' => '', 'email' => $this->student->email]
+            ]
+        );
+
+        $this->assertStringNotContainsString('Location:', $response);
+        $this->assertMatchesRegularExpression('/id="error_user_nickname">Não pode ser vazio!/', $response);
+        $this->assertEquals('Student', User::findById((int) $this->student->id)?->nickname);
     }
 
     public function test_destroy_prevents_deleting_self(): void

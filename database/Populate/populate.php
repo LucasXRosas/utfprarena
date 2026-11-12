@@ -16,6 +16,7 @@ $storage->deleteDirectory('users');
 // 1. Administrador (Gestor da Arena)
 $admin = new User([
     'name' => 'Administrador Arena',
+    'nickname' => 'Administrador',
     'email' => 'admin@arena.com',
     'password' => 'admin123',
     'password_confirmation' => 'admin123',
@@ -29,6 +30,7 @@ $admin->save();
 // 2. Aluno Ativo (Regular)
 $aluno = new User([
     'name' => 'Aluno Beach Tennis',
+    'nickname' => 'Aluno',
     'email' => 'aluno@arena.com',
     'password' => 'aluno123',
     'password_confirmation' => 'aluno123',
@@ -42,6 +44,7 @@ $aluno->save();
 // 3. Aluno Inadimplente (Bloqueado)
 $bloqueado = new User([
     'name' => 'Aluno Inadimplente',
+    'nickname' => 'Aluno',
     'email' => 'bloqueado@arena.com',
     'password' => 'aluno123',
     'password_confirmation' => 'aluno123',
@@ -55,6 +58,7 @@ $bloqueado->save();
 // 4. Outros atletas para teste de paginação e gestão
 $aluno3 = new User([
     'name' => 'Beatriz Lima',
+    'nickname' => 'Beatriz',
     'email' => 'beatriz@arena.com',
     'password' => 'aluno123',
     'password_confirmation' => 'aluno123',
@@ -67,6 +71,7 @@ $aluno3->save();
 
 $aluno4 = new User([
     'name' => 'Carlos Eduardo',
+    'nickname' => 'Carlos',
     'email' => 'carlos@arena.com',
     'password' => 'aluno123',
     'password_confirmation' => 'aluno123',
@@ -79,6 +84,7 @@ $aluno4->save();
 
 $aluno5 = new User([
     'name' => 'Daniela Souza',
+    'nickname' => 'Daniela',
     'email' => 'daniela@arena.com',
     'password' => 'aluno123',
     'password_confirmation' => 'aluno123',
@@ -91,6 +97,7 @@ $aluno5->save();
 
 $aluno6 = new User([
     'name' => 'Eduardo Mendes',
+    'nickname' => 'Eduardo',
     'email' => 'eduardo@arena.com',
     'password' => 'aluno123',
     'password_confirmation' => 'aluno123',

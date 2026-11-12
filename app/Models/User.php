@@ -10,6 +10,7 @@ use Lib\Validations;
 /**
  * @property int $id
  * @property string $name
+ * @property string $nickname
  * @property string $email
  * @property string $encrypted_password
  * @property ?string $avatar_name
@@ -44,12 +45,14 @@ class User extends Model
         self::STATUS_BLOCKED => 'Bloqueado (Inadimplência / Pendência)',
     ];
 
+    public const NICKNAME_MAX_LENGTH = 50;
     public const PASSWORD_MIN_LENGTH = 6;
     public const CPF_REGEX = '/^\d{3}\.\d{3}\.\d{3}-\d{2}$/';
 
     protected static string $table = 'users';
     protected static array $columns = [
         'name',
+        'nickname',
         'email',
         'encrypted_password',
         'avatar_name',
@@ -90,6 +93,10 @@ class User extends Model
     {
         Validations::notEmpty('name', $this);
         Validations::maxLength('name', $this, 255);
+
+        // Apelido: obrigatório (rejeita null, '' e só espaços), espelhando o NOT NULL da coluna
+        Validations::notEmpty('nickname', $this);
+        Validations::maxLength('nickname', $this, self::NICKNAME_MAX_LENGTH);
 
         Validations::notEmpty('email', $this);
         Validations::email('email', $this);

@@ -37,6 +37,7 @@ class UsersCrudCest
 
         // Submissão com senhas divergentes
         $page->fillField('user[name]', 'Novo Atleta Invalido');
+        $page->fillField('user[nickname]', 'Invalido');
         $page->fillField('user[email]', 'invalido@arena.com');
         $page->fillField('user[password]', 'senha123');
         $page->fillField('user[password_confirmation]', 'senhaDiferente');
@@ -57,6 +58,7 @@ class UsersCrudCest
         $page->click('#btn_submit_user'); // novalidate: o navegador não bloqueia o envio
 
         $page->see('Não pode ser vazio!', '#error_user_name');
+        $page->see('Não pode ser vazio!', '#error_user_nickname');
         $page->see('Não pode ser vazio!', '#error_user_email');
         $page->see('Não pode ser vazio!', '#error_user_password');
         $page->seeElement('#user_name.is-invalid');
@@ -70,6 +72,7 @@ class UsersCrudCest
         $page->amOnPage('/admin/users/new');
 
         $page->fillField('user[name]', 'Carlos Magno Atleta');
+        $page->fillField('user[nickname]', 'Magno');
         $page->fillField('user[email]', 'carlos.magno@arena.com');
         $page->fillField('user[phone]', '(41) 91111-2222');
         $page->fillField('user[cpf]', '123.456.789-00');

@@ -15,6 +15,7 @@ class AuthCest extends BaseAcceptanceCest
         // Prepara usuários para os testes de aceitação
         $admin = new User([
             'name' => 'Administrador Arena',
+            'nickname' => 'Administrador',
             'email' => 'admin@arena.com',
             'password' => 'admin123',
             'password_confirmation' => 'admin123',
@@ -25,6 +26,7 @@ class AuthCest extends BaseAcceptanceCest
 
         $aluno = new User([
             'name' => 'Aluno Beach Tennis',
+            'nickname' => 'Aluno',
             'email' => 'aluno@arena.com',
             'password' => 'aluno123',
             'password_confirmation' => 'aluno123',

@@ -22,6 +22,7 @@ class InvoiceTest extends TestCase
 
         $this->user = new User([
             'name' => 'Aluno Teste',
+            'nickname' => 'Aluno',
             'email' => 'aluno.invoice@arena.com',
             'password' => '123456',
             'password_confirmation' => '123456',

@@ -19,6 +19,7 @@ class ProfileControllerTest extends ControllerTestCase
 
         $this->student = new User([
             'name' => 'Aluno Perfil',
+            'nickname' => 'Aluno',
             'email' => 'aluno.perfil@arena.com',
             'password' => 'secret123',
             'password_confirmation' => 'secret123',

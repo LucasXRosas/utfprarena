@@ -20,6 +20,7 @@ class ProfileAvatarTest extends TestCase
 
         $this->user = new User([
             'name' => 'Atleta Avatar',
+            'nickname' => 'Atleta',
             'email' => 'avatar@arena.com',
             'password' => '123456',
             'password_confirmation' => '123456',

@@ -37,6 +37,14 @@ $value = fn(string $field): string => htmlspecialchars((string) ($targetUser->$f
         <?= $feedback('name') ?>
     </div>
 
+    <!-- Apelido -->
+    <div class="col-md-6">
+        <label for="user_nickname" class="form-label fw-semibold">Apelido <span class="text-danger">*</span></label>
+        <input type="text" class="form-control<?= $invalid('nickname') ?>" id="user_nickname" name="user[nickname]"
+               value="<?= $value('nickname') ?>" placeholder="Ex: Lukinha" maxlength="<?= User::NICKNAME_MAX_LENGTH ?>" required>
+        <?= $feedback('nickname') ?>
+    </div>
+
     <!-- E-mail -->
     <div class="col-md-6">
         <label for="user_email" class="form-label fw-semibold">E-mail <span class="text-danger">*</span></label>

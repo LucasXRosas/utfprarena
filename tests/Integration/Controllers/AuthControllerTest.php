@@ -17,6 +17,7 @@ class AuthControllerTest extends ControllerTestCase
 
         $this->admin = new User([
             'name' => 'Admin Controller Test',
+            'nickname' => 'Admin',
             'email' => 'admin.ctrl@arena.com',
             'password' => 'secret123',
             'password_confirmation' => 'secret123',
@@ -27,6 +28,7 @@ class AuthControllerTest extends ControllerTestCase
 
         $this->student = new User([
             'name' => 'Student Controller Test',
+            'nickname' => 'Student',
             'email' => 'student.ctrl@arena.com',
             'password' => 'secret123',
             'password_confirmation' => 'secret123',
@@ -37,6 +39,7 @@ class AuthControllerTest extends ControllerTestCase
 
         $this->blocked = new User([
             'name' => 'Blocked Controller Test',
+            'nickname' => 'Blocked',
             'email' => 'blocked.ctrl@arena.com',
             'password' => 'secret123',
             'password_confirmation' => 'secret123',

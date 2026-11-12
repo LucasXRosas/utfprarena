@@ -16,6 +16,7 @@ class AuthTest extends TestCase
         $_SESSION = [];
         $this->user = new User([
             'name' => 'User 1',
+            'nickname' => 'User',
             'email' => 'fulano@example.com',
             'password' => '123456',
             'password_confirmation' => '123456'
