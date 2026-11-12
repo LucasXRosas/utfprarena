@@ -83,7 +83,13 @@ class CourtImagesController extends Controller
 
         $gallery = $court->gallery();
         $removedPath = $gallery->url($image);
-        $gallery->remove($image);
+
+        // Mensagem de sucesso só quando o serviço confirma a remoção (banco + arquivo)
+        if (!$gallery->remove($image)) {
+            FlashMessage::danger((string) $gallery->firstError());
+            $this->redirectTo(route('admin.courts.show', ['id' => $court->id]));
+            return;
+        }
 
         FlashMessage::success(
             'Imagem ' . $image->original_name . ' removida com sucesso! Arquivo apagado do filesystem: '

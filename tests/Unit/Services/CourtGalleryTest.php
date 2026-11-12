@@ -6,6 +6,8 @@ use App\Models\Court;
 use App\Models\CourtImage;
 use App\Services\CourtGallery;
 use App\Services\ImageValidator;
+use Core\Database\Database;
+use Tests\Support\DatabaseFailure;
 use Tests\Support\Upload\TestFileStorage;
 use Tests\Support\Upload\UploadFixtures;
 use Tests\TestCase;
@@ -97,6 +99,34 @@ class CourtGalleryTest extends TestCase
 
         $this->assertFileDoesNotExist($path);
         $this->assertNull(CourtImage::findById($image->id));
+    }
+
+    public function test_remove_keeps_file_when_database_delete_fails(): void
+    {
+        $image = $this->gallery->add(UploadFixtures::validPng());
+        $this->assertNotNull($image);
+        $path = (new TestFileStorage())->absolutePath($image->relativePath());
+
+        DatabaseFailure::on('court_images', 'DELETE');
+
+        $this->assertFalse($this->gallery->remove($image));
+        $this->assertStringContainsString('Não foi possível remover a imagem', (string) $this->gallery->firstError());
+
+        // Registro e arquivo continuam existindo: nada aponta para arquivo inexistente
+        $this->assertNotNull(CourtImage::findById($image->id));
+        $this->assertFileExists($path);
+    }
+
+    public function test_remove_returns_false_when_record_was_already_deleted(): void
+    {
+        $image = $this->gallery->add(UploadFixtures::validPng());
+        $this->assertNotNull($image);
+
+        // Outro processo apagou o registro: destroy() não afeta nenhuma linha
+        Database::getDatabaseConn()->exec('DELETE FROM court_images WHERE id = ' . (int) $image->id);
+
+        $this->assertFalse($this->gallery->remove($image));
+        $this->assertNotNull($this->gallery->firstError());
     }
 
     public function test_remove_image_from_another_gallery_is_denied(): void

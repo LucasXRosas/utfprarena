@@ -100,7 +100,11 @@ class CourtGallery
     }
 
     /**
-     * Remove uma imagem da galeria (arquivo do filesystem + registro do banco).
+     * Remove uma imagem da galeria (registro do banco + arquivo do filesystem).
+     *
+     * O registro é excluído primeiro; o arquivo só é apagado depois que a exclusão no banco
+     * for confirmada. Assim, se a persistência falhar, o registro continua apontando para
+     * um arquivo que ainda existe.
      */
     public function remove(CourtImage $image): bool
     {
@@ -111,8 +115,22 @@ class CourtGallery
             return false;
         }
 
-        $this->storage->delete($image->relativePath());
-        return $image->destroy();
+        $relativePath = $image->relativePath();
+
+        try {
+            $deleted = $image->destroy();
+        } catch (\PDOException $e) {
+            $deleted = false;
+        }
+
+        if (!$deleted) {
+            $this->errors[] = 'Não foi possível remover a imagem ' . $image->original_name . '. Tente novamente.';
+            return false;
+        }
+
+        $this->storage->delete($relativePath);
+
+        return true;
     }
 
     /**
