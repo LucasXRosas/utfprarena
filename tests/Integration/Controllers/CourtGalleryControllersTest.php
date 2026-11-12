@@ -6,6 +6,7 @@ use App\Models\Court;
 use App\Models\CourtImage;
 use App\Models\User;
 use Lib\Authentication\Auth;
+use Tests\Support\DatabaseFailure;
 use Tests\Support\Upload\TestFileStorage;
 use Tests\Support\Upload\UploadFixtures;
 
@@ -168,6 +169,25 @@ class CourtGalleryControllersTest extends ControllerTestCase
         $this->assertNull(CourtImage::findById($image->id));
         $this->assertFileDoesNotExist($path);
         $this->assertStringContainsString('removida com sucesso', $_SESSION['flash']['success'] ?? '');
+    }
+
+    public function test_destroy_image_shows_error_when_database_delete_fails(): void
+    {
+        $image = $this->createImageWithFile();
+        $path = (new TestFileStorage())->absolutePath($image->relativePath());
+
+        DatabaseFailure::on('court_images', 'DELETE');
+
+        $response = $this->post('destroy', 'App\Controllers\Admin\CourtImagesController', [
+            'court_id' => $this->court->id,
+            'id' => $image->id,
+        ]);
+
+        $this->assertStringContainsString('Location: /admin/courts/' . $this->court->id, $response);
+        $this->assertArrayNotHasKey('success', $_SESSION['flash'] ?? []);
+        $this->assertStringContainsString('Não foi possível remover a imagem', $_SESSION['flash']['danger'] ?? '');
+        $this->assertNotNull(CourtImage::findById($image->id));
+        $this->assertFileExists($path);
     }
 
     public function test_destroy_image_of_another_court_is_not_found(): void

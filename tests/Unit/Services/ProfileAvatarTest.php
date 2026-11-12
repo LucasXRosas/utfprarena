@@ -5,6 +5,8 @@ namespace Tests\Unit\Services;
 use App\Models\User;
 use App\Services\ImageValidator;
 use App\Services\ProfileAvatar;
+use Core\Database\Database;
+use Tests\Support\DatabaseFailure;
 use Tests\Support\Upload\TestFileStorage;
 use Tests\Support\Upload\UploadFixtures;
 use Tests\TestCase;
@@ -68,6 +70,56 @@ class ProfileAvatarTest extends TestCase
         $this->assertNotEquals($oldPath, $newPath);
         $this->assertFileDoesNotExist($oldPath);
         $this->assertFileExists($newPath);
+    }
+
+    public function test_update_keeps_previous_avatar_when_database_update_fails(): void
+    {
+        $this->assertTrue($this->avatar->update(UploadFixtures::validJpeg()));
+        $previousName = $this->user->avatar_name;
+        $previousPath = (string) $this->avatar->absolutePath();
+        $directory = dirname($previousPath);
+
+        DatabaseFailure::on('users', 'UPDATE');
+
+        $this->assertFalse($this->avatar->update(UploadFixtures::validPng()));
+        $this->assertStringContainsString('foto anterior foi mantida', (string) $this->avatar->firstError());
+
+        // Banco continua apontando para o arquivo anterior, que ainda existe
+        $this->assertEquals($previousName, User::findById($this->user->id)?->avatar_name);
+        $this->assertFileExists($previousPath);
+
+        // Objeto em memória também volta ao valor anterior
+        $this->assertEquals($previousName, $this->user->avatar_name);
+
+        // O arquivo novo foi descartado: só o anterior permanece na pasta
+        $files = array_values(array_diff(scandir($directory) ?: [], ['.', '..']));
+        $this->assertEquals([basename($previousPath)], $files);
+    }
+
+    public function test_update_when_user_row_no_longer_exists_discards_new_file(): void
+    {
+        // Model::update() retorna false quando nenhuma linha é afetada
+        Database::getDatabaseConn()->exec('DELETE FROM users WHERE id = ' . (int) $this->user->id);
+
+        $this->assertFalse($this->avatar->update(UploadFixtures::validPng()));
+        $this->assertNull($this->user->avatar_name);
+
+        $directory = (new TestFileStorage())->absolutePath($this->avatar->directory());
+        $this->assertEquals([], array_values(array_diff(scandir($directory) ?: [], ['.', '..'])));
+    }
+
+    public function test_remove_keeps_file_when_database_update_fails(): void
+    {
+        $this->avatar->update(UploadFixtures::validPng());
+        $name = $this->user->avatar_name;
+        $path = (string) $this->avatar->absolutePath();
+
+        DatabaseFailure::on('users', 'UPDATE');
+
+        $this->assertFalse($this->avatar->remove());
+        $this->assertFileExists($path);
+        $this->assertEquals($name, User::findById($this->user->id)?->avatar_name);
+        $this->assertEquals($name, $this->user->avatar_name);
     }
 
     public function test_update_rejects_invalid_file_and_keeps_user_unchanged(): void

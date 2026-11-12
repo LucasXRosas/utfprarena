@@ -69,7 +69,13 @@ class ProfileAvatar
     }
 
     /**
-     * Valida e grava uma nova foto de perfil, substituindo (e apagando do disco) a anterior.
+     * Valida e grava uma nova foto de perfil, substituindo a anterior.
+     *
+     * Ordem pensada para manter banco e filesystem consistentes:
+     *  1. grava o arquivo novo;
+     *  2. atualiza users.avatar_name;
+     *  3. só então apaga o arquivo anterior.
+     * Se o passo 2 falhar, o arquivo novo é descartado e o anterior continua valendo.
      *
      * @param array<string, mixed>|null $file entrada de $_FILES['avatar']
      */
@@ -88,27 +94,56 @@ class ProfileAvatar
         }
 
         $fileName = FileStorage::randomName('avatar', (string) $this->validator->safeExtension());
-        $this->storage->store((string) $file['tmp_name'], $this->directory(), $fileName);
 
-        // Remove o arquivo antigo do filesystem antes de apontar para o novo
-        $this->removeFile();
-        $this->user->update(['avatar_name' => $fileName]);
+        try {
+            $newRelativePath = $this->storage->store((string) $file['tmp_name'], $this->directory(), $fileName);
+        } catch (\RuntimeException $e) {
+            $this->errors[] = $e->getMessage();
+            return false;
+        }
+
+        $previousName = $this->user->avatar_name;
+        $previousRelativePath = $this->relativePath();
+
+        if (!$this->persistAvatarName($fileName)) {
+            // Banco não foi atualizado: descarta o arquivo novo e mantém o anterior intacto
+            $this->storage->delete($newRelativePath);
+            $this->user->avatar_name = $previousName;
+            $this->errors[] = 'Não foi possível salvar a foto de perfil. A foto anterior foi mantida.';
+            return false;
+        }
+
+        // Banco já aponta para o arquivo novo: agora é seguro apagar o anterior
+        if ($previousRelativePath !== null) {
+            $this->storage->delete($previousRelativePath);
+        }
 
         return true;
     }
 
     /**
-     * Remove a foto de perfil (filesystem + referência no banco).
+     * Remove a foto de perfil (referência no banco + filesystem).
+     * O arquivo só é apagado depois que o banco deixa de apontar para ele.
      */
     public function remove(): bool
     {
-        if ($this->relativePath() === null) {
+        $this->errors = [];
+
+        $relativePath = $this->relativePath();
+        if ($relativePath === null) {
             $this->errors = ['Nenhuma foto de perfil cadastrada.'];
             return false;
         }
 
-        $this->removeFile();
-        $this->user->update(['avatar_name' => null]);
+        $previousName = $this->user->avatar_name;
+
+        if (!$this->persistAvatarName(null)) {
+            $this->user->avatar_name = $previousName;
+            $this->errors[] = 'Não foi possível remover a foto de perfil. Tente novamente.';
+            return false;
+        }
+
+        $this->storage->delete($relativePath);
 
         return true;
     }
@@ -141,11 +176,17 @@ class ProfileAvatar
         return $this->validator;
     }
 
-    private function removeFile(): void
+    /**
+     * Grava users.avatar_name e informa se o banco realmente foi atualizado.
+     * Model::update() retorna false quando nenhuma linha é afetada (ex: usuário removido)
+     * e pode lançar PDOException (ex: banco indisponível); os dois casos contam como falha.
+     */
+    private function persistAvatarName(?string $fileName): bool
     {
-        $relativePath = $this->relativePath();
-        if ($relativePath !== null) {
-            $this->storage->delete($relativePath);
+        try {
+            return $this->user->update(['avatar_name' => $fileName]);
+        } catch (\PDOException $e) {
+            return false;
         }
     }
 }
