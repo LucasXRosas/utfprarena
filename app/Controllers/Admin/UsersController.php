@@ -90,8 +90,9 @@ class UsersController extends Controller
 
         $title = 'Credencial do Atleta: ' . $targetUser->name;
         $invoices = Invoice::allByUser($targetUser->id);
+        $trainingClasses = $targetUser->trainingClasses;
 
-        $this->render('admin/users/show', compact('title', 'targetUser', 'invoices'));
+        $this->render('admin/users/show', compact('title', 'targetUser', 'invoices', 'trainingClasses'));
     }
 
     /**

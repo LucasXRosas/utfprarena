@@ -48,7 +48,7 @@ class Controller
         $view = Constants::rootPath()->join('app/views/' . $view . '.json.php');
         $json = [];
 
-        header('Content-Type: application/json; chartset=utf-8');
+        header('Content-Type: application/json; charset=utf-8');
         require $view;
         echo json_encode($json);
         return;

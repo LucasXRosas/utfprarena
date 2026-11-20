@@ -125,3 +125,24 @@
         </div>
     </div>
 </div>
+
+<!-- Relação NxN vista pelo lado do aluno: turmas em que o atleta está matriculado -->
+<div class="card border-0 shadow-sm mt-4">
+    <div class="card-header bg-white fw-semibold">
+        <i class="bi bi-people"></i> Turmas do Atleta
+    </div>
+    <div class="card-body" id="athlete_classes">
+        <?php if (empty($trainingClasses)) : ?>
+            <p class="text-muted small mb-0">Este atleta não está matriculado em nenhuma turma.</p>
+        <?php else : ?>
+            <div class="d-flex flex-wrap gap-2">
+                <?php foreach ($trainingClasses as $trainingClass) : ?>
+                    <a href="/admin/classes/<?= $trainingClass->id ?>" class="btn btn-outline-primary btn-sm">
+                        <?= htmlspecialchars($trainingClass->name) ?>
+                        <span class="text-muted small">(<?= htmlspecialchars($trainingClass->schedule) ?>)</span>
+                    </a>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
+    </div>
+</div>

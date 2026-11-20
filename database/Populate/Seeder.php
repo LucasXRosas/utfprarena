@@ -2,6 +2,7 @@
 
 namespace Database\Populate;
 
+use App\Models\TrainingClass;
 use App\Models\User;
 use Core\Database\Database;
 
@@ -10,7 +11,11 @@ use Core\Database\Database;
  *
  * Usado pelo populate.php (banco de desenvolvimento) e pelos testes de aceitação,
  * que recriam o banco de teste e chamam Seeder::run() antes de cada cenário.
- * IDs gerados: usuários 1 a 7, quadras 1 a 3.
+ * IDs gerados: usuários 1 a 7, quadras 1 a 3, turmas 1 a 4.
+ *   Turma 1 (Iniciante): Aluno Beach Tennis, Beatriz, Carlos
+ *   Turma 2 (Intermediário): Aluno Beach Tennis, Eduardo
+ *   Turma 3 (Avançado): Carlos
+ *   Turma 4 (Kids): sem alunos
  */
 class Seeder
 {
@@ -129,5 +134,38 @@ class Seeder
             ");
             $stmt->execute([':uid' => $bloqueado->id]);
         }
+
+        // 7. Turmas de treino (relação NxN com os alunos)
+        $iniciante = self::createClass('Iniciante - Terça e Quinta 19h', TrainingClass::LEVEL_BEGINNER, 'Terça e Quinta 19h', 8);
+        $intermediario = self::createClass(
+            'Intermediário - Segunda e Quarta 20h',
+            TrainingClass::LEVEL_INTERMEDIATE,
+            'Segunda e Quarta 20h',
+            6
+        );
+        $avancado = self::createClass('Avançado - Sábado 9h', TrainingClass::LEVEL_ADVANCED, 'Sábado 9h', 4);
+        // Turma sem alunos: pode ser excluída (as outras têm dependências e não podem)
+        self::createClass('Kids - Sábado 10h', TrainingClass::LEVEL_BEGINNER, 'Sábado 10h', 10);
+
+        // 8. Matrículas (linhas da tabela pivô class_enrollments)
+        $iniciante->enroll($aluno);
+        $iniciante->enroll($aluno3);
+        $iniciante->enroll($aluno4);
+        $intermediario->enroll($aluno);
+        $intermediario->enroll($aluno6);
+        $avancado->enroll($aluno4);
+    }
+
+    private static function createClass(string $name, string $level, string $schedule, int $capacity): TrainingClass
+    {
+        $trainingClass = new TrainingClass([
+            'name' => $name,
+            'level' => $level,
+            'schedule' => $schedule,
+            'capacity' => $capacity,
+        ]);
+        $trainingClass->save();
+
+        return $trainingClass;
     }
 }

@@ -1,0 +1,67 @@
+<?php
+$fieldError = function (string $field, string $label) use ($trainingClass): string {
+    $error = $trainingClass->errors($field);
+    if ($error === null) {
+        return '';
+    }
+
+    return '<div class="invalid-feedback" id="error_class_' . $field . '">'
+        . htmlspecialchars($label . ' ' . $error) . '</div>';
+};
+$invalid = fn (string $field): string => $trainingClass->errors($field) !== null ? ' is-invalid' : '';
+?>
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+            <div>
+                <h1 class="h3 fw-bold text-dark mb-0">Cadastrar Turma</h1>
+                <small class="text-secondary">Após o cadastro você poderá matricular os alunos</small>
+            </div>
+            <a href="/admin/classes" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-arrow-left"></i> Voltar
+            </a>
+        </div>
+
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+                <!-- novalidate: sem os balões do navegador; a validação é feita no backend (TrainingClass::validates) -->
+                <form action="/admin/classes" method="POST" id="new_class_form" novalidate>
+                    <div class="mb-3">
+                        <label for="class_name" class="form-label fw-semibold">Nome da Turma <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control<?= $invalid('name') ?>" id="class_name"
+                               name="training_class[name]" value="<?= htmlspecialchars((string) ($trainingClass->name ?? '')) ?>"
+                               placeholder="Ex: Turma Kids - Sábado 10h" maxlength="100">
+                        <?= $fieldError('name', 'O nome da turma') ?>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="class_level" class="form-label fw-semibold">Nível</label>
+                            <select class="form-select<?= $invalid('level') ?>" id="class_level" name="training_class[level]">
+                                <?php foreach (\App\Models\TrainingClass::LEVEL_OPTIONS as $value => $label) : ?>
+                                    <option value="<?= $value ?>" <?= $trainingClass->level === $value ? 'selected' : '' ?>><?= $label ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                            <?= $fieldError('level', 'O nível') ?>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="class_capacity" class="form-label fw-semibold">Vagas <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control<?= $invalid('capacity') ?>" id="class_capacity"
+                                   name="training_class[capacity]" value="<?= htmlspecialchars((string) $trainingClass->capacity) ?>">
+                            <?= $fieldError('capacity', 'O número de vagas') ?>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="class_schedule" class="form-label fw-semibold">Horário <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control<?= $invalid('schedule') ?>" id="class_schedule"
+                               name="training_class[schedule]" value="<?= htmlspecialchars((string) ($trainingClass->schedule ?? '')) ?>"
+                               placeholder="Ex: Sábado 10h" maxlength="100">
+                        <?= $fieldError('schedule', 'O horário') ?>
+                    </div>
+                    <button type="submit" class="btn btn-primary" id="btn_submit_class">
+                        <i class="bi bi-check2-circle"></i> Cadastrar Turma
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

@@ -21,4 +21,5 @@ echo "Aluno: aluno@arena.com / aluno123\n";
 echo "Aluno Bloqueado: bloqueado@arena.com / aluno123\n";
 echo "------------------------------------------\n";
 echo "Galerias: /admin/courts  |  Perfil: /profile\n";
+echo "Turmas (NxN + Ajax): /admin/classes\n";
 echo "==========================================\n";

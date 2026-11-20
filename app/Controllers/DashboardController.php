@@ -20,6 +20,9 @@ class DashboardController extends Controller
             ? Invoice::allByUser($user->id)
             : [];
 
-        $this->render('dashboard/index', compact('title', 'user', 'courts', 'invoices'));
+        // Relação NxN vista pelo lado do aluno: turmas em que ele está matriculado
+        $trainingClasses = $user !== null ? $user->trainingClasses : [];
+
+        $this->render('dashboard/index', compact('title', 'user', 'courts', 'invoices', 'trainingClasses'));
     }
 }

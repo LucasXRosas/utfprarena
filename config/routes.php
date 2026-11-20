@@ -2,6 +2,8 @@
 
 use App\Controllers\Admin\CourtImagesController as AdminCourtImagesController;
 use App\Controllers\Admin\CourtsController as AdminCourtsController;
+use App\Controllers\Admin\EnrollmentsController as AdminEnrollmentsController;
+use App\Controllers\Admin\TrainingClassesController as AdminTrainingClassesController;
 use App\Controllers\Admin\UsersController as AdminUsersController;
 use App\Controllers\AuthController;
 use App\Controllers\CourtsController;
@@ -59,5 +61,19 @@ Route::middleware('auth')->group(function () {
             ->name('admin.courts.images.create');
         Route::delete('/admin/courts/{court_id}/images/{id}', [AdminCourtImagesController::class, 'destroy'])
             ->name('admin.courts.images.destroy');
+
+        // Turmas (relação NxN com alunos através da tabela pivô class_enrollments)
+        Route::get('/admin/classes', [AdminTrainingClassesController::class, 'index'])->name('admin.classes.index');
+        Route::get('/admin/classes/new', [AdminTrainingClassesController::class, 'new'])->name('admin.classes.new');
+        Route::post('/admin/classes', [AdminTrainingClassesController::class, 'create'])->name('admin.classes.create');
+        Route::get('/admin/classes/{id}', [AdminTrainingClassesController::class, 'show'])->name('admin.classes.show');
+        Route::delete('/admin/classes/{id}', [AdminTrainingClassesController::class, 'destroy'])
+            ->name('admin.classes.destroy');
+
+        // Matrículas (registro/remoção da relação) — chamadas via Ajax, respondem JSON
+        Route::post('/admin/classes/{class_id}/enrollments', [AdminEnrollmentsController::class, 'create'])
+            ->name('admin.classes.enrollments.create');
+        Route::delete('/admin/classes/{class_id}/enrollments/{user_id}', [AdminEnrollmentsController::class, 'destroy'])
+            ->name('admin.classes.enrollments.destroy');
     });
 });
