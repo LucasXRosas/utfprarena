@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Services\ProfileAvatar;
+use Core\Database\ActiveRecord\BelongsToMany;
 use Core\Database\ActiveRecord\HasMany;
 use Core\Database\ActiveRecord\Model;
 use Lib\Validations;
@@ -22,6 +23,7 @@ use Lib\Validations;
  * @property ?string $email_verified_at
  * @property ?string $password_reset_token
  * @property ?string $password_reset_expires_at
+ * @property array<TrainingClass> $trainingClasses
  */
 class User extends Model
 {
@@ -190,6 +192,15 @@ class User extends Model
         }
 
         return Invoice::allByUser($this->id);
+    }
+
+    /**
+     * Turmas em que o aluno está matriculado (lado inverso da relação NxN com TrainingClass).
+     * Mesma tabela pivô, com as chaves invertidas: parte de users.id = class_enrollments.user_id.
+     */
+    public function trainingClasses(): BelongsToMany
+    {
+        return $this->BelongsToMany(TrainingClass::class, 'class_enrollments', 'user_id', 'training_class_id');
     }
 
     /**

@@ -1,5 +1,7 @@
 SET foreign_key_checks = 0;
 
+DROP TABLE IF EXISTS class_enrollments;
+DROP TABLE IF EXISTS training_classes;
 DROP TABLE IF EXISTS court_images;
 DROP TABLE IF EXISTS invoices;
 DROP TABLE IF EXISTS courts;
@@ -59,6 +61,40 @@ CREATE TABLE court_images (
     KEY idx_court_images_court_id (court_id),
     CONSTRAINT fk_court_images_court
         FOREIGN KEY (court_id) REFERENCES courts(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Turmas de treino da arena (um dos lados da relação NxN Turma <-> Aluno)
+CREATE TABLE training_classes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    level VARCHAR(30) NOT NULL DEFAULT 'beginner',
+    schedule VARCHAR(100) NOT NULL,
+    capacity INT UNSIGNED NOT NULL DEFAULT 8,
+    created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_training_classes_name (name)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Tabela pivô (associativa) da relação NxN: uma turma possui N alunos e um aluno participa de N turmas.
+--  * UNIQUE (training_class_id, user_id): o mesmo aluno não pode ser matriculado duas vezes na mesma turma;
+--  * training_class_id ... ON DELETE RESTRICT: uma turma com alunos matriculados NÃO pode ser excluída
+--    (registro com dependências); primeiro é preciso remover as matrículas;
+--  * user_id ... ON DELETE CASCADE: ao excluir um atleta, as matrículas dele são removidas junto
+--    (mesma regra já usada em invoices.user_id).
+CREATE TABLE class_enrollments (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    training_class_id INT NOT NULL,
+    user_id INT NOT NULL,
+    created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_class_enrollments_class_user (training_class_id, user_id),
+    KEY idx_class_enrollments_user_id (user_id),
+    CONSTRAINT fk_class_enrollments_class
+        FOREIGN KEY (training_class_id) REFERENCES training_classes(id)
+        ON DELETE RESTRICT
+        ON UPDATE CASCADE,
+    CONSTRAINT fk_class_enrollments_user
+        FOREIGN KEY (user_id) REFERENCES users(id)
         ON DELETE CASCADE
         ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

@@ -108,6 +108,34 @@
     </div>
 </div>
 
+<!-- Minhas Turmas: relação NxN vista pelo lado do aluno ($user->trainingClasses usa o BelongsToMany) -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white fw-semibold d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-people"></i> Minhas Turmas</span>
+        <span class="badge bg-light text-dark border" id="my_classes_count"><?= count($trainingClasses) ?> turma(s)</span>
+    </div>
+    <div class="card-body" id="my_classes">
+        <?php if (empty($trainingClasses)) : ?>
+            <p class="text-muted small mb-0">Você ainda não está matriculado em nenhuma turma. Procure a secretaria da arena.</p>
+        <?php else : ?>
+            <div class="row g-3">
+                <?php foreach ($trainingClasses as $trainingClass) : ?>
+                    <div class="col-md-4">
+                        <div class="border rounded-3 p-3 h-100 bg-light" id="my_class_<?= $trainingClass->id ?>">
+                            <h6 class="fw-bold mb-1"><?= htmlspecialchars($trainingClass->name) ?></h6>
+                            <span class="badge bg-info text-dark mb-2"><?= htmlspecialchars($trainingClass->levelLabel()) ?></span>
+                            <div class="small text-muted"><i class="bi bi-clock"></i> <?= htmlspecialchars($trainingClass->schedule) ?></div>
+                            <div class="small text-muted">
+                                <i class="bi bi-people"></i> <?= $trainingClass->studentsCount() ?>/<?= (int) $trainingClass->capacity ?> alunos
+                            </div>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
+    </div>
+</div>
+
 <!-- Quadras Disponíveis -->
 <div class="card border-0 shadow-sm">
     <div class="card-header bg-white fw-semibold">

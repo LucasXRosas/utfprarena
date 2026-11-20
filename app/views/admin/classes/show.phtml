@@ -1,0 +1,116 @@
+<?php
+$studentsCount = count($students);
+$capacity = (int) $trainingClass->capacity;
+?>
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4 pb-3 border-bottom">
+    <div>
+        <h1 class="h3 fw-bold text-dark mb-1">Turma: <?= htmlspecialchars($trainingClass->name) ?></h1>
+        <small class="text-secondary">
+            <span class="badge bg-info text-dark"><?= htmlspecialchars($trainingClass->levelLabel()) ?></span>
+            &bull; <i class="bi bi-clock"></i> <?= htmlspecialchars($trainingClass->schedule) ?>
+            &bull; <i class="bi bi-people"></i>
+            <span id="students_count"><?= $studentsCount ?></span>/<span id="students_capacity"><?= $capacity ?></span> alunos
+            <span class="badge bg-danger<?= $studentsCount >= $capacity ? '' : ' d-none' ?>" id="class_full_badge">LOTADA</span>
+        </small>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="/admin/classes" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left"></i> Voltar às Turmas
+        </a>
+    </div>
+</div>
+
+<!-- Mensagens das requisições Ajax (preenchidas pelo enrollments.js, sem recarregar a página) -->
+<div id="ajax_feedback" aria-live="polite"></div>
+
+<div class="row g-4">
+    <!-- Registro da relação: matricular aluno -->
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-dark text-white fw-semibold">
+                <i class="bi bi-person-plus"></i> Matricular Aluno
+            </div>
+            <div class="card-body">
+                <!-- data-ajax: o enrollments.js intercepta o submit e envia via Ajax (sem JS, funciona como form comum) -->
+                <form action="/admin/classes/<?= $trainingClass->id ?>/enrollments" method="POST"
+                      id="enroll_form" data-ajax="enroll" novalidate>
+                    <label for="enroll_user_id" class="form-label fw-semibold">Aluno</label>
+                    <select class="form-select mb-3" id="enroll_user_id" name="user_id">
+                        <?php if (empty($availableStudents)) : ?>
+                            <option value="">Nenhum aluno disponível</option>
+                        <?php else : ?>
+                            <option value="">Selecione um aluno...</option>
+                        <?php endif; ?>
+                        <?php foreach ($availableStudents as $available) : ?>
+                            <option value="<?= $available->id ?>">
+                                <?= htmlspecialchars($available->name . ' (' . $available->email . ')') ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                    <button type="submit" class="btn btn-warning fw-semibold w-100" id="btn_enroll">
+                        <i class="bi bi-plus-circle"></i> Matricular
+                    </button>
+                </form>
+                <p class="form-text mt-3 mb-0">
+                    A matrícula grava uma linha na tabela pivô <code>class_enrollments</code>
+                    (<code>training_class_id</code>, <code>user_id</code>).
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Visualização da relação: alunos matriculados -->
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white fw-semibold">
+                <i class="bi bi-person-lines-fill"></i> Alunos Matriculados
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0" id="enrolled_students"
+                           data-class-id="<?= $trainingClass->id ?>">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-3">Aluno</th>
+                                <th>E-mail</th>
+                                <th>Status</th>
+                                <th class="text-end pe-3">Ação</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr id="no_students" class="<?= $studentsCount > 0 ? 'd-none' : '' ?>">
+                                <td colspan="4" class="text-center py-4 text-muted">Nenhum aluno matriculado nesta turma.</td>
+                            </tr>
+                            <?php foreach ($students as $student) : ?>
+                                <tr id="enrolled_student_<?= $student->id ?>">
+                                    <td class="ps-3 fw-semibold">
+                                        <a href="/admin/users/<?= $student->id ?>"><?= htmlspecialchars($student->name) ?></a>
+                                    </td>
+                                    <td class="text-muted small"><?= htmlspecialchars($student->email) ?></td>
+                                    <td>
+                                        <span class="badge <?= $student->isActive() ? 'bg-success' : 'bg-danger' ?>">
+                                            <?= $student->isActive() ? 'ATIVO' : 'BLOQUEADO' ?>
+                                        </span>
+                                    </td>
+                                    <td class="text-end pe-3">
+                                        <form action="/admin/classes/<?= $trainingClass->id ?>/enrollments/<?= $student->id ?>"
+                                              method="POST" class="m-0" data-ajax="unenroll"
+                                              data-student-name="<?= htmlspecialchars($student->name) ?>">
+                                            <input type="hidden" name="_method" value="DELETE">
+                                            <button type="submit" class="btn btn-outline-danger btn-sm" id="btn_unenroll_<?= $student->id ?>">
+                                                <i class="bi bi-person-dash"></i> Remover
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- $assetVersion vem do layout (application.phtml): muda a URL quando o arquivo muda, evitando JS antigo em cache -->
+<script src="/assets/js/enrollments.js?v=<?= $assetVersion('/assets/js/enrollments.js') ?>"></script>

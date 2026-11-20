@@ -19,8 +19,8 @@ O **UTFPR Arena** é um sistema de gerenciamento de arenas esportivas de *Beach 
 | Tipo de Usuário | Papel (`role`) | Área Exclusiva | Permissões e Ações Permitidas |
 |---|---|---|---|
 | **Visitante** | Não autenticado | `/` e `/login` | Visualizar página inicial pública e efetuar login. Bloqueado de qualquer área restrita. |
-| **Aluno (Atleta)** | `student` | `/dashboard`, `/profile`, `/courts/{id}` | Visualizar credencial de acesso ("Apto para Jogar"), histórico de mensalidades, quadras disponíveis e suas galerias de fotos; enviar/remover a própria foto de perfil. |
-| **Administrador (Gestor)** | `manager` | `/admin`, `/admin/courts` | Acesso ao Painel Gerencial, métricas de faturamento e atletas, controle manual de status (bloquear / ativar atleta) e gestão das quadras com upload/remoção de fotos da galeria. |
+| **Aluno (Atleta)** | `student` | `/dashboard`, `/profile`, `/courts/{id}` | Visualizar credencial de acesso ("Apto para Jogar"), histórico de mensalidades, as turmas em que está matriculado, quadras disponíveis e suas galerias de fotos; enviar/remover a própria foto de perfil. |
+| **Administrador (Gestor)** | `manager` | `/admin`, `/admin/courts`, `/admin/classes` | Acesso ao Painel Gerencial, métricas de faturamento e atletas, controle manual de status (bloquear / ativar atleta), gestão das quadras com upload/remoção de fotos da galeria e gestão das turmas com matrícula/remoção de alunos via Ajax. |
 
 ### 1.3 Imagens e Arquivos (Relação 1xN)
 | Funcionalidade | Rotas | Armazenamento |
@@ -29,6 +29,19 @@ O **UTFPR Arena** é um sistema de gerenciamento de arenas esportivas de *Beach 
 | **Foto de perfil (avatar)** | `GET /profile`, `POST /profile/avatar`, `DELETE /profile/avatar` | Arquivo em `public/assets/uploads/users/{user_id}/`; nome na coluna `users.avatar_name` |
 
 Validações de upload (`app/Services/ImageValidator.php`): apenas **JPG/JPEG, PNG e WEBP**, até **2MB**, MIME type real verificado pelo conteúdo, bloqueio de extensões executáveis (ex: `foto.php.jpg`) e de imagens com código embutido.
+
+### 1.4 Turmas e Matrículas (Relação NxN + Ajax)
+Uma **turma** (`training_classes`) possui N **alunos** e um aluno participa de N turmas. A relação é guardada na tabela pivô `class_enrollments` (`training_class_id`, `user_id`), com `UNIQUE (training_class_id, user_id)`.
+
+| Ação | Rota | Observação |
+|---|---|---|
+| Listar / cadastrar / excluir turmas | `GET /admin/classes`, `GET /admin/classes/new`, `POST /admin/classes`, `DELETE /admin/classes/{id}` | Turma com alunos matriculados **não pode ser excluída** (validação no model + `ON DELETE RESTRICT`) |
+| Ver alunos da turma | `GET /admin/classes/{id}` | Lado turma → alunos (`TrainingClass::students()`, `BelongsToMany`) |
+| Matricular aluno (Ajax) | `POST /admin/classes/{class_id}/enrollments` | Responde JSON (`201`/`422`) quando a requisição tem `Accept: application/json` |
+| Remover matrícula (Ajax) | `DELETE /admin/classes/{class_id}/enrollments/{user_id}` | Remove só a linha da pivô; turma e aluno continuam existindo |
+| Ver turmas do aluno | `GET /dashboard` (Minhas Turmas) e `GET /admin/users/{id}` | Lado aluno → turmas (`User::trainingClasses()`, `BelongsToMany`) |
+
+O JavaScript fica em `public/assets/js/enrollments.js` (XMLHttpRequest + Promise + async/await). Sem JavaScript, os mesmos formulários funcionam com redirect + flash message.
 
 ---
 
@@ -71,7 +84,7 @@ Para checar se todos os contêineres subiram com sucesso:
 ```
 
 ### Passo 5: Criar o Banco de Dados e as Tabelas
-Execute o reset do schema MySQL para criar as tabelas `users`, `courts`, `invoices` e `court_images`:
+Execute o reset do schema MySQL para criar as tabelas `users`, `courts`, `invoices`, `court_images`, `training_classes` e `class_enrollments`:
 ```bash
 ./run db:reset
 ```
