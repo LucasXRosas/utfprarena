@@ -107,6 +107,47 @@ class AuthenticatedRoutesAccessTest extends TestCase
         ]);
     }
 
+    /* ---------------- Rotas da relação NxN (turmas e matrículas) ---------------- */
+
+    public function test_should_redirect_unauthenticated_user_from_classes(): void
+    {
+        $this->assertRedirectsToLogin('GET', '/admin/classes');
+        $this->assertRedirectsToLogin('GET', '/admin/classes/new');
+        $this->assertRedirectsToLogin('GET', '/admin/classes/1');
+    }
+
+    public function test_should_block_unauthenticated_class_creation_and_removal(): void
+    {
+        $this->assertRedirectsToLogin('POST', '/admin/classes', [
+            'form_params' => ['training_class' => ['name' => 'Invasora', 'schedule' => 'Domingo 8h']],
+        ]);
+        $this->assertRedirectsToLogin('POST', '/admin/classes/4', [
+            'form_params' => ['_method' => 'DELETE'],
+        ]);
+    }
+
+    public function test_should_block_unauthenticated_enrollment_registration_and_removal(): void
+    {
+        $this->assertRedirectsToLogin('POST', '/admin/classes/1/enrollments', [
+            'form_params' => ['user_id' => 2],
+        ]);
+        $this->assertRedirectsToLogin('DELETE', '/admin/classes/1/enrollments/2');
+    }
+
+    public function test_should_return_401_json_for_unauthenticated_ajax_enrollment(): void
+    {
+        // Requisição Ajax (Accept: application/json) sem sessão: 401 em JSON, sem redirect
+        foreach (['POST' => '/admin/classes/1/enrollments', 'DELETE' => '/admin/classes/1/enrollments/2'] as $method => $uri) {
+            $response = $this->client->request($method, $uri, [
+                'headers' => ['Accept' => 'application/json'],
+            ]);
+
+            $this->assertEquals(401, $response->getStatusCode(), "{$method} {$uri} deveria retornar 401");
+            $this->assertStringContainsString('application/json', $response->getHeaderLine('Content-Type'));
+            $this->assertEquals(401, json_decode((string) $response->getBody(), true)['code'] ?? null);
+        }
+    }
+
     public function test_should_return_401_for_unauthenticated_json_request(): void
     {
         $response = $this->client->get('/dashboard', [
