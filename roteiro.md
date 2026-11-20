@@ -161,15 +161,25 @@ Repare que **Aluno Beach Tennis** está em 2 turmas e a **turma Iniciante** tem 
 
 ## 2. Explicação de Conceitos — Peso 1,5
 
-> Cada conceito vem com a referência de livro exigida pela rubrica (lista completa no fim do documento).
+> **Exigência da rubrica:** cada conceito precisa de uma **referência de livro** com nome do livro e capítulo. Cada item abaixo tem:
+> 1. a **FALA** explicando o conceito;
+> 2. o bloco 📚 com **livro, autor, edição, editora, ano, número e nome do capítulo** (e seção);
+> 3. uma **citação pronta para falar no vídeo**, que diz o livro e o capítulo em voz alta.
+>
+> **Dica para a gravação:** ao citar, mostre na tela a seção **"Referências bibliográficas"** no fim deste roteiro, ou a capa e o sumário do livro. Todas as referências estão reunidas lá.
 
 ### 2.1 Definição conceitual de NxN
 
 🗣️ **FALA**
 > "Um relacionamento **N para N**, ou **muitos para muitos (M:N)**, acontece quando uma ocorrência de uma entidade se associa a **várias** ocorrências da outra, e vice-versa. Uma turma tem vários alunos e um aluno frequenta várias turmas. No modelo relacional esse relacionamento **não cabe numa chave estrangeira simples**: não dá para pôr `user_id` na turma, porque são vários, nem `training_class_id` no aluno, pelo mesmo motivo. Por isso ele vira uma **nova tabela**, a tabela associativa ou pivô. Ela tem **uma FK para cada lado**, e a chave dela é a combinação das duas FKs. Na prática, um N:N vira **dois relacionamentos 1:N**: turma 1:N matrícula e aluno 1:N matrícula."
 
-📚 **Referência:** ELMASRI; NAVATHE, 2018. Cap. 3 (razão de cardinalidade M:N) e Cap. 9, seção 9.1, **passo 5: "Mapeamento de tipos de relacionamento binários M:N"**, que cria uma nova relação S com as chaves primárias das duas entidades como FKs.
-📚 Complementar: HEUSER, 2009, Cap. 5 (transformação de relacionamento n:n em tabela própria).
+📚 **Referência bibliográfica**
+- **Livro:** *Sistemas de Banco de Dados*, 7. ed. Autores: Ramez Elmasri e Shamkant B. Navathe. São Paulo: Pearson, 2018.
+  - **Capítulo 3 – "Modelagem de dados usando o modelo Entidade-Relacionamento (ER)"**, seção 3.4 (restrições em tipos de relacionamento binários: **razão de cardinalidade 1:1, 1:N e M:N**).
+  - **Capítulo 9 – "Projeto de banco de dados relacional por mapeamento ER e EER para relacional"**, seção 9.1, **passo 5: "Mapeamento de tipos de relacionamento binários M:N"**, que cria uma nova relação com as chaves primárias das duas entidades como chaves estrangeiras.
+- **Complementar:** *Projeto de Banco de Dados*, 6. ed. Autor: Carlos Alberto Heuser. Porto Alegre: Bookman, 2009. **Capítulo 5 – "Transformações entre modelos"** (relacionamento n:n implementado como tabela própria).
+
+🗣️ **Citação para falar no vídeo:** *"Segundo Elmasri e Navathe, no livro Sistemas de Banco de Dados, capítulo 9, um relacionamento M:N é mapeado criando uma nova relação que contém as chaves primárias das duas entidades como chaves estrangeiras."*
 
 📁 `database/schema.sql`, linhas 85–100 (tabela `class_enrollments`).
 
@@ -189,7 +199,13 @@ INSERT INTO class_enrollments (training_class_id, user_id) VALUES (1, 2);
 -- ERROR 1062 (23000): Duplicate entry '1-2' for key 'class_enrollments.uq_class_enrollments_class_user'
 ```
 
-📚 **Referência:** ELMASRI; NAVATHE, 2018. Cap. 5 (restrições de chave e unicidade) e Cap. 17 (estruturas de indexação; índices em múltiplos atributos). Complementar: SILBERSCHATZ; KORTH; SUDARSHAN, 2020, capítulo de Indexação (índices em chaves de busca múltiplas).
+📚 **Referência bibliográfica**
+- **Livro:** *Sistemas de Banco de Dados*, 7. ed. Autores: Ramez Elmasri e Shamkant B. Navathe. São Paulo: Pearson, 2018.
+  - **Capítulo 5 – "O modelo de dados relacional e as restrições em bancos de dados relacionais"**, seção 5.2 (**restrições de chave**: nenhuma tupla pode repetir o valor da chave).
+  - **Capítulo 17 – "Estruturas de indexação para arquivos e projeto físico de banco de dados"**, seção 17.4 (**índices em chaves múltiplas**, ou seja, índices compostos).
+- **Complementar:** *Sistema de Banco de Dados*, 7. ed. Autores: Abraham Silberschatz, Henry F. Korth e S. Sudarshan. Rio de Janeiro: GEN LTC, 2020. **Capítulo 14 – "Indexação"** (índices ordenados e índices em chaves de busca múltiplas).
+
+🗣️ **Citação para falar no vídeo:** *"Como explicam Elmasri e Navathe no capítulo 5 de Sistemas de Banco de Dados, a restrição de chave garante que duas tuplas não tenham o mesmo valor nos atributos da chave. No capítulo 17 eles mostram que um índice pode ser feito sobre vários atributos, que é o nosso índice único composto."*
 
 📁 `database/schema.sql`, linha 90 · `app/Models/Enrollment.php`, linhas 56–60 (a mesma regra na aplicação, com mensagem amigável).
 
@@ -198,14 +214,24 @@ INSERT INTO class_enrollments (training_class_id, user_id) VALUES (1, 2);
 🗣️ **FALA**
 > "**Ajax** (*Asynchronous JavaScript and XML*) é uma técnica, não uma linguagem. O JavaScript da página faz requisições HTTP **em segundo plano**, recebe só os **dados**, hoje quase sempre em JSON e não mais em XML, e atualiza **apenas a parte da página** que mudou, manipulando o DOM. O termo foi criado por Jesse James Garrett em 2005. A vantagem é a experiência do usuário: não há tela branca, a página não perde estado e trafegam menos dados. No nosso sistema, matricular e remover alunos são requisições Ajax."
 
-📚 **Referência:** FLANAGAN, 2013 (6. ed.), Cap. 18 "HTTP com scripts" (definição de Ajax e o objeto XMLHttpRequest). Complementar: GARRETT, J. J. *Ajax: A New Approach to Web Applications*, 2005.
+📚 **Referência bibliográfica**
+- **Livro:** *JavaScript: O Guia Definitivo*, 6. ed. Autor: David Flanagan. Porto Alegre: Bookman, 2013.
+  - **Capítulo 18 – "HTTP com scripts"**, introdução do capítulo (definição de **Ajax**) e seção 18.1 "Usando XMLHttpRequest".
+- **Complementar (artigo, não é livro):** GARRETT, Jesse James. *Ajax: A New Approach to Web Applications*, 2005. É o texto que criou o termo.
+
+🗣️ **Citação para falar no vídeo:** *"Segundo David Flanagan, em JavaScript: O Guia Definitivo, capítulo 18, Ajax é o uso de scripts para fazer requisições HTTP sem recarregar a página, atualizando só a parte necessária do documento."*
 
 ### 2.4 Diferença entre requisição síncrona e assíncrona
 
 🗣️ **FALA**
 > "Numa requisição **síncrona**, o código **para e espera** a resposta. No navegador isso congela a interface: o usuário não clica, não rola a página, nada acontece até o servidor responder. Numa requisição **assíncrona**, o código **dispara a requisição e continua executando**. Quando a resposta chega, uma função é chamada, que pode ser um callback, um evento ou uma Promise. Toda navegação tradicional de formulário também é 'síncrona' do ponto de vista do usuário, porque ele espera a página nova inteira. No nosso código, o terceiro parâmetro de `xhr.open(method, url, true)` é o **`true` = assíncrona**. A versão síncrona (`false`) é desaconselhada pelos navegadores justamente por travar a página."
 
-📚 **Referência:** FLANAGAN, 2013 (6. ed.), Cap. 18, seção sobre respostas síncronas × assíncronas do XMLHttpRequest. FLANAGAN, 2022 (7. ed.), Cap. 13 "JavaScript assíncrono".
+📚 **Referência bibliográfica**
+- **Livro:** *JavaScript: O Guia Definitivo*, 6. ed. Autor: David Flanagan. Porto Alegre: Bookman, 2013.
+  - **Capítulo 18 – "HTTP com scripts"**, seção 18.1.2 "Recuperando a resposta", subseção **"Respostas síncronas"** (o terceiro argumento de `open()` e por que o modo síncrono trava o navegador).
+- **Complementar:** *JavaScript: O Guia Definitivo*, 7. ed. Autor: David Flanagan. Porto Alegre: Bookman, 2022. **Capítulo 13 – "JavaScript assíncrono"**, seção 13.1 (programação assíncrona com callbacks).
+
+🗣️ **Citação para falar no vídeo:** *"Flanagan, no capítulo 18 de JavaScript: O Guia Definitivo, mostra que o XMLHttpRequest é assíncrono por padrão e que a forma síncrona bloqueia o navegador até a resposta chegar, por isso deve ser evitada."*
 
 📁 `public/assets/js/enrollments.js`, linha 46.
 
@@ -214,7 +240,13 @@ INSERT INTO class_enrollments (training_class_id, user_id) VALUES (1, 2);
 🗣️ **FALA**
 > "**JSON** (*JavaScript Object Notation*) é um formato **texto** de troca de dados, independente de linguagem, baseado na sintaxe de literais do JavaScript. A estrutura tem **dois tipos compostos**: **objeto**, que são pares `"chave": valor` entre chaves `{ }`, com a chave sempre entre aspas duplas, e **array**, que é uma lista ordenada entre colchetes `[ ]`. E tem **quatro tipos primitivos**: string, número, booleano (`true`/`false`) e `null`. Não aceita comentários, funções nem vírgula sobrando no final. No PHP geramos o JSON com `json_encode()`. No JavaScript lemos com `JSON.parse()`. A nossa resposta é um objeto com `success` (booleano), `message` (string), `student` e `training_class` (objetos) e `available_students` (array de objetos)."
 
-📚 **Referência:** CROCKFORD, D. *O Melhor do JavaScript*, 2008, Apêndice E (JSON). FLANAGAN, 2022 (7. ed.), seção 11.6 "Serialização e análise de JSON". Norma: RFC 8259 / ECMA-404.
+📚 **Referência bibliográfica**
+- **Livro:** *O Melhor do JavaScript*. Autor: Douglas Crockford (criador do JSON). Rio de Janeiro: Alta Books, 2008.
+  - **Apêndice E – "JSON"**: sintaxe, os tipos de valores (objeto, array, string, número, booleano e `null`) e a estrutura do formato.
+- **Complementar:** *JavaScript: O Guia Definitivo*, 7. ed. Autor: David Flanagan. Porto Alegre: Bookman, 2022. **Capítulo 11 – "A biblioteca-padrão de JavaScript"**, seção 11.6 **"Serialização e análise de JSON"** (`JSON.stringify` e `JSON.parse`).
+- **Norma (não é livro):** RFC 8259 / ECMA-404.
+
+🗣️ **Citação para falar no vídeo:** *"Douglas Crockford, criador do formato, explica no apêndice E do livro O Melhor do JavaScript que o JSON é um formato texto para troca de dados, formado por objetos, arrays e quatro tipos de valores simples."*
 
 📁 `app/views/admin/enrollments/result.json.php` (monta o array) · `core/Http/Controllers/Controller.php`, linha 44 (`renderJson` faz o `json_encode`) · `public/assets/js/enrollments.js`, linha 37 (`JSON.parse`).
 
@@ -232,7 +264,12 @@ INSERT INTO class_enrollments (training_class_id, user_id) VALUES (1, 2);
 
 🎬 Mostre o Console do DevTools com os logs `readyState 1 → 2 → 3 → 4` de uma matrícula.
 
-📚 **Referência:** FLANAGAN, 2013 (6. ed.), Cap. 18, seção 18.1 (tabela com os valores de `readyState`). Norma: WHATWG *XMLHttpRequest Living Standard*.
+📚 **Referência bibliográfica**
+- **Livro:** *JavaScript: O Guia Definitivo*, 6. ed. Autor: David Flanagan. Porto Alegre: Bookman, 2013.
+  - **Capítulo 18 – "HTTP com scripts"**, seção 18.1.2 **"Recuperando a resposta"**, com a **tabela 18-1, que lista os valores de `readyState`** (UNSENT, OPENED, HEADERS_RECEIVED, LOADING e DONE) e o evento `readystatechange`.
+- **Norma (não é livro):** WHATWG *XMLHttpRequest Living Standard*.
+
+🗣️ **Citação para falar no vídeo:** *"Flanagan apresenta, no capítulo 18 de JavaScript: O Guia Definitivo, a tabela com os cinco valores de readyState, de 0 a 4. O corpo da resposta só está completo no estado 4."*
 
 📁 `public/assets/js/enrollments.js`, linhas 14 (nomes dos estados) e 25–43 (`onreadystatechange`).
 
@@ -243,7 +280,11 @@ INSERT INTO class_enrollments (training_class_id, user_id) VALUES (1, 2);
 >
 > **`async`** marca uma função como assíncrona; ela sempre retorna uma Promise. Dentro dela, **`await`** pausa **apenas aquela função** até a Promise terminar e devolve o valor resolvido. Se a Promise for rejeitada, o `await` lança a exceção, que tratamos com `try/catch`. O código fica com cara de síncrono, mas **não bloqueia o navegador**: enquanto espera, a página continua respondendo. O `finally` reabilita o botão em qualquer caso."
 
-📚 **Referência:** FLANAGAN, 2022 (7. ed.), Cap. 13 "JavaScript assíncrono": seção 13.2 (Promises) e seção 13.3 (`async` e `await`).
+📚 **Referência bibliográfica**
+- **Livro:** *JavaScript: O Guia Definitivo*, 7. ed. Autor: David Flanagan. Porto Alegre: Bookman, 2022.
+  - **Capítulo 13 – "JavaScript assíncrono"**, seção 13.2 **"Promessas"** (estados pendente, resolvida e rejeitada; `then`/`catch`) e seção 13.3 **"async e await"**.
+
+🗣️ **Citação para falar no vídeo:** *"Segundo Flanagan, no capítulo 13 de JavaScript: O Guia Definitivo, uma Promise representa o resultado futuro de uma operação assíncrona, e as palavras-chave async e await permitem escrever esse código como se fosse síncrono, sem bloquear o navegador."*
 
 📁 `public/assets/js/enrollments.js`, linhas 20–51 (`new Promise`) e 157–182 (`async function` + `await requestJson(...)` + `try/catch/finally`).
 
@@ -346,7 +387,10 @@ WHERE users.id = class_enrollments.user_id AND
       training_classes.id = 1;
 ```
 
-📚 **Referência:** FOWLER, 2006, Cap. 12 (padrão **Association Table Mapping**). Cap. 10 (padrão **Active Record**).
+📚 **Referência bibliográfica**
+- **Livro:** *Padrões de Arquitetura de Aplicações Corporativas*. Autor: Martin Fowler. Porto Alegre: Bookman, 2006.
+  - **Capítulo 10 – "Padrões de arquitetura de fontes de dados"**: padrão **Active Record** (base do `Model`).
+  - **Capítulo 12 – "Padrões estruturais objeto-relacionais"**: padrão **Association Table Mapping** (Mapeamento de Tabela Associativa), que é o que o `BelongsToMany` implementa.
 
 #### 3.2.2 HasMany/BelongsTo na pivô e renderJson
 
@@ -584,60 +628,61 @@ Resultado esperado: **Unit 174 OK · Integration 83 OK · Acceptance 32 OK · PH
 
 ---
 
-## Referências
+## Referências bibliográficas
 
-Referências bibliográficas usadas na explicação dos conceitos (Seção 2) e do framework (Seção 3), em formato ABNT, com os capítulos consultados. *Confiram a numeração de capítulos e seções na edição disponível na biblioteca antes de citar no vídeo.*
+Todas as referências usadas no roteiro, reunidas num só lugar. Elas aparecem em três formatos:
+- **Parte 1:** por conceito, na ordem da rubrica, com livro e capítulo. É o que deve ser mostrado ou citado no vídeo.
+- **Parte 2:** lista completa dos livros em formato ABNT, em ordem alfabética.
+- **Parte 3:** fontes complementares que não são livros (artigo e normas técnicas).
 
-### Livros
+> ⚠️ Confiram a numeração de capítulos e seções na edição disponível na biblioteca (ou no Minha Biblioteca/Pearson da UTFPR) antes de gravar. Edições diferentes podem mudar a numeração.
 
-1. **ELMASRI, Ramez; NAVATHE, Shamkant B.** *Sistemas de Banco de Dados*. 7. ed. São Paulo: Pearson Education do Brasil, 2018.
-   - **Cap. 3:** Modelagem de dados usando o modelo Entidade-Relacionamento. Restrições estruturais e **razão de cardinalidade (1:1, 1:N, M:N)**.
-   - **Cap. 5:** O Modelo de Dados Relacional e as Restrições. **Restrições de chave** (unicidade) e integridade referencial.
-   - **Cap. 9:** Projeto de banco de dados relacional por mapeamento ER para relacional. Seção 9.1, **passo 5: mapeamento de tipos de relacionamento binários M:N** (nova relação com as duas FKs).
-   - **Cap. 17:** Estruturas de indexação para arquivos e projeto físico. **Índices em múltiplos atributos**.
-   - *Usado em:* 2.1 NxN e 2.2 index unique.
+### Parte 1 — Referência de livro de cada conceito (rubrica 1.5)
 
-2. **HEUSER, Carlos Alberto.** *Projeto de Banco de Dados*. 6. ed. Porto Alegre: Bookman, 2009. (Série Livros Didáticos Informática UFRGS, v. 4).
-   - **Cap. 5:** Transformação entre modelos (ER → relacional). Implementação de relacionamento **n:n como tabela própria**.
-   - *Usado em:* 2.1 NxN (complementar).
+| # | Conceito da rubrica | Livro (autor, edição, ano) | Capítulo |
+|---|---|---|---|
+| 1 | Definição conceitual de NxN | *Sistemas de Banco de Dados* — Elmasri e Navathe, 7. ed., Pearson, 2018 | **Cap. 3** "Modelagem de dados usando o modelo Entidade-Relacionamento (ER)", seção 3.4 (razão de cardinalidade M:N) · **Cap. 9** "Projeto de banco de dados relacional por mapeamento ER e EER para relacional", seção 9.1, passo 5 (mapeamento de relacionamentos binários M:N) |
+| 1 | *(complementar)* | *Projeto de Banco de Dados* — Heuser, 6. ed., Bookman, 2009 | **Cap. 5** "Transformações entre modelos" (relacionamento n:n vira tabela) |
+| 2 | `index unique: true` | *Sistemas de Banco de Dados* — Elmasri e Navathe, 7. ed., Pearson, 2018 | **Cap. 5** "O modelo de dados relacional e as restrições em bancos de dados relacionais", seção 5.2 (restrições de chave) · **Cap. 17** "Estruturas de indexação para arquivos e projeto físico de banco de dados", seção 17.4 (índices em chaves múltiplas) |
+| 2 | *(complementar)* | *Sistema de Banco de Dados* — Silberschatz, Korth e Sudarshan, 7. ed., GEN LTC, 2020 | **Cap. 14** "Indexação" |
+| 3 | Definição de Ajax | *JavaScript: O Guia Definitivo* — Flanagan, 6. ed., Bookman, 2013 | **Cap. 18** "HTTP com scripts" (introdução e seção 18.1 "Usando XMLHttpRequest") |
+| 4 | Requisição síncrona × assíncrona | *JavaScript: O Guia Definitivo* — Flanagan, 6. ed., Bookman, 2013 | **Cap. 18** "HTTP com scripts", seção 18.1.2, subseção "Respostas síncronas" |
+| 4 | *(complementar)* | *JavaScript: O Guia Definitivo* — Flanagan, 7. ed., Bookman, 2022 | **Cap. 13** "JavaScript assíncrono", seção 13.1 |
+| 5 | Definição e estrutura do JSON | *O Melhor do JavaScript* — Crockford, Alta Books, 2008 | **Apêndice E** "JSON" |
+| 5 | *(complementar)* | *JavaScript: O Guia Definitivo* — Flanagan, 7. ed., Bookman, 2022 | **Cap. 11** "A biblioteca-padrão de JavaScript", seção 11.6 "Serialização e análise de JSON" |
+| 6 | Estados da requisição (readyState) | *JavaScript: O Guia Definitivo* — Flanagan, 6. ed., Bookman, 2013 | **Cap. 18** "HTTP com scripts", seção 18.1.2 "Recuperando a resposta" (tabela 18-1, valores de `readyState`) |
+| 7 | Async, Promise e await | *JavaScript: O Guia Definitivo* — Flanagan, 7. ed., Bookman, 2022 | **Cap. 13** "JavaScript assíncrono", seções 13.2 "Promessas" e 13.3 "async e await" |
+| — | Framework: BelongsToMany / Active Record (Seção 3.2) | *Padrões de Arquitetura de Aplicações Corporativas* — Fowler, Bookman, 2006 | **Cap. 10** "Padrões de arquitetura de fontes de dados" (Active Record) · **Cap. 12** "Padrões estruturais objeto-relacionais" (Association Table Mapping) |
 
-3. **SILBERSCHATZ, Abraham; KORTH, Henry F.; SUDARSHAN, S.** *Sistema de Banco de Dados*. 7. ed. Rio de Janeiro: GEN LTC, 2020.
-   - Capítulo de **Indexação**: índices ordenados, índices em chaves de busca múltiplas e índices únicos.
-   - *Usado em:* 2.2 index unique (complementar).
+### Parte 2 — Livros (ABNT, ordem alfabética)
 
-4. **FLANAGAN, David.** *JavaScript: O Guia Definitivo*. 6. ed. Porto Alegre: Bookman, 2013.
-   - **Cap. 18:** HTTP com scripts. Definição de **Ajax**, o objeto **XMLHttpRequest**, `open()`/`send()`, requisições **síncronas × assíncronas**, o evento `readystatechange` e a **tabela de valores de `readyState`** (seção 18.1).
-   - *Usado em:* 2.3 Ajax, 2.4 Síncrona × assíncrona e 2.6 readyState.
+1. CROCKFORD, Douglas. **O melhor do JavaScript**. Rio de Janeiro: Alta Books, 2008.
+   - Apêndice E – JSON. → *Conceito 5.*
 
-5. **FLANAGAN, David.** *JavaScript: O Guia Definitivo*. 7. ed. Porto Alegre: Bookman, 2022.
-   - **Cap. 11, seção 11.6:** Serialização e análise de **JSON** (`JSON.stringify`/`JSON.parse`).
-   - **Cap. 13:** JavaScript assíncrono. Seção 13.2 **Promises** e seção 13.3 **`async` e `await`**.
-   - *Usado em:* 2.4, 2.5 JSON e 2.7 Async/Promise/await.
+2. ELMASRI, Ramez; NAVATHE, Shamkant B. **Sistemas de banco de dados**. 7. ed. São Paulo: Pearson Education do Brasil, 2018.
+   - Cap. 3 – Modelagem de dados usando o modelo Entidade-Relacionamento (ER). → *Conceito 1.*
+   - Cap. 5 – O modelo de dados relacional e as restrições em bancos de dados relacionais. → *Conceito 2.*
+   - Cap. 9 – Projeto de banco de dados relacional por mapeamento ER e EER para relacional. → *Conceito 1.*
+   - Cap. 17 – Estruturas de indexação para arquivos e projeto físico de banco de dados. → *Conceito 2.*
 
-6. **CROCKFORD, Douglas.** *O Melhor do JavaScript*. Rio de Janeiro: Alta Books, 2008.
-   - **Apêndice E:** JSON. Sintaxe, tipos de valores e estrutura (objeto e array).
-   - *Usado em:* 2.5 JSON.
+3. FLANAGAN, David. **JavaScript: o guia definitivo**. 6. ed. Porto Alegre: Bookman, 2013.
+   - Cap. 18 – HTTP com scripts. → *Conceitos 3, 4 e 6.*
 
-7. **FOWLER, Martin.** *Padrões de Arquitetura de Aplicações Corporativas*. Porto Alegre: Bookman, 2006.
-   - **Cap. 10:** Padrões de Arquitetura de Fontes de Dados. Padrão **Active Record**.
-   - **Cap. 12:** Padrões Estruturais Objeto-Relacionais. Padrão **Association Table Mapping** (Mapeamento de Tabela Associativa), base do `BelongsToMany`.
-   - *Usado em:* 3.2 Funcionamento do Framework.
+4. FLANAGAN, David. **JavaScript: o guia definitivo**. 7. ed. Porto Alegre: Bookman, 2022.
+   - Cap. 11 – A biblioteca-padrão de JavaScript (seção 11.6). → *Conceito 5 (complementar).*
+   - Cap. 13 – JavaScript assíncrono. → *Conceito 7 e conceito 4 (complementar).*
 
-### Artigos e normas
+5. FOWLER, Martin. **Padrões de arquitetura de aplicações corporativas**. Porto Alegre: Bookman, 2006.
+   - Cap. 10 – Padrões de arquitetura de fontes de dados. Cap. 12 – Padrões estruturais objeto-relacionais. → *Seção 3.2, Framework.*
 
-8. **GARRETT, Jesse James.** *Ajax: A New Approach to Web Applications*. Adaptive Path, 18 fev. 2005. Texto que cunhou o termo Ajax. *Usado em:* 2.3.
-9. **BRAY, T. (ed.).** *RFC 8259: The JavaScript Object Notation (JSON) Data Interchange Format*. IETF, 2017. Disponível em: https://www.rfc-editor.org/rfc/rfc8259. *Usado em:* 2.5.
-10. **WHATWG.** *XMLHttpRequest Living Standard*. Disponível em: https://xhr.spec.whatwg.org/. Define `readyState` (UNSENT, OPENED, HEADERS_RECEIVED, LOADING, DONE). *Usado em:* 2.6.
+6. HEUSER, Carlos Alberto. **Projeto de banco de dados**. 6. ed. Porto Alegre: Bookman, 2009. (Série Livros Didáticos Informática UFRGS, v. 4).
+   - Cap. 5 – Transformações entre modelos. → *Conceito 1 (complementar).*
 
-### Mapa rápido: conceito → referência
+7. SILBERSCHATZ, Abraham; KORTH, Henry F.; SUDARSHAN, S. **Sistema de banco de dados**. 7. ed. Rio de Janeiro: GEN LTC, 2020.
+   - Cap. 14 – Indexação. → *Conceito 2 (complementar).*
 
-| Conceito (rubrica) | Referência principal | Complementar |
-|---|---|---|
-| Definição de NxN | Elmasri; Navathe (2018), Caps. 3 e 9 | Heuser (2009), Cap. 5 |
-| index unique | Elmasri; Navathe (2018), Caps. 5 e 17 | Silberschatz et al. (2020), Indexação |
-| Ajax | Flanagan (2013), Cap. 18 | Garrett (2005) |
-| Síncrona × assíncrona | Flanagan (2013), Cap. 18 | Flanagan (2022), Cap. 13 |
-| JSON | Crockford (2008), Apêndice E | Flanagan (2022), seção 11.6; RFC 8259 |
-| readyState | Flanagan (2013), seção 18.1 | WHATWG XHR Standard |
-| Async, Promise e await | Flanagan (2022), Cap. 13 | — |
-| BelongsToMany / Active Record | Fowler (2006), Caps. 10 e 12 | — |
+### Parte 3 — Fontes complementares (não são livros)
+
+8. GARRETT, Jesse James. **Ajax: a new approach to web applications**. Adaptive Path, 18 fev. 2005. Artigo que criou o termo Ajax. → *Conceito 3.*
+9. BRAY, T. (ed.). **RFC 8259: The JavaScript Object Notation (JSON) Data Interchange Format**. IETF, 2017. Disponível em: https://www.rfc-editor.org/rfc/rfc8259. → *Conceito 5.*
+10. WHATWG. **XMLHttpRequest Living Standard**. Disponível em: https://xhr.spec.whatwg.org/. → *Conceito 6.*
